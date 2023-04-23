@@ -66,14 +66,12 @@ public class LCOM3Calculator extends LCOMCalculator {
         this.calculateMetrics(type);
         double new_m = this.m + 1; // Increment the count of methods
         double new_a = this.a;
-        double new_sumMA = 0;
 
         for (MethodDeclaration method : methods) {
             cfaCollector.clearLocalReferences();
             method.accept(cfaCollector);
-            new_sumMA += cfaCollector.getNodesCollected().size();
         }
-
+        double new_sumMA = cfaCollector.getNodesCollected().size();
         double lcom3 = (new_m - (new_sumMA / new_a)) / (new_m - 1);
         return Double.isNaN(lcom3) ? 0 : lcom3;
     }
