@@ -1,12 +1,15 @@
 package cmu.csdetector.refactor;
 
 import cmu.csdetector.metrics.MetricName;
+import cmu.csdetector.resources.Method;
 import cmu.csdetector.resources.Resource;
+import cmu.csdetector.resources.Type;
 
 import java.util.ArrayList;
 
 public class MethodMover {
-    public Resource moveMethod(Resource method, Resource source_class, ArrayList<Resource> classes) {
+    public Resource moveMethod(Method method, Resource source_class, ArrayList<Type> classes) {
+        // returns the class the method should be moved to
         // Resource source_class = method.getBelongingClass();
         Double source_lcom3 = source_class.getMetricValue(MetricName.LCOM3);
         for (Resource target_class: classes) {
