@@ -9,21 +9,21 @@ public class StatementCollector extends CollectorVisitor<ASTNode> {
 
 	private Integer loc;
 
-	private List<Set<String>> matrix;
+	private TreeMap<Integer, Set<String>> matrix;
 
 	public StatementCollector() {
 		this.loc = 0;
-		this.matrix = new ArrayList<>();
+		this.matrix = new TreeMap<>();
 	}
 
-	public List<Set<String>> getMatrix() {
+	public TreeMap<Integer, Set<String>> getMatrix() {
 		return this.matrix;
 	}
 
 	// add accessible variables and method calls
 	private void addName(String name) {
-		int lastIndex = this.matrix.size() - 1;
-		Set<String> accessSet = this.matrix.get(lastIndex);
+		int lastKey = this.matrix.lastKey();
+		Set<String> accessSet = this.matrix.get(lastKey);
 		accessSet.add(name);
 	}
 
@@ -37,7 +37,8 @@ public class StatementCollector extends CollectorVisitor<ASTNode> {
 
 	private void createNewStatement(ASTNode node) {
 		super.addCollectedNode(node);
-		this.matrix.add(new HashSet<>());
+		this.loc++;
+		this.matrix.put(this.loc, new HashSet<>());
 	}
 
 	public boolean visit(DoStatement node) {
@@ -163,7 +164,7 @@ public class StatementCollector extends CollectorVisitor<ASTNode> {
 
 	//System.out, Movie.NEW_RELEASE
 	public boolean visit(QualifiedName node) {
-		return false;
+		return true;
 	}
 
 

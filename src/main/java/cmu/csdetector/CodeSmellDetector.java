@@ -25,10 +25,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class CodeSmellDetector {
 
@@ -72,7 +69,7 @@ public class CodeSmellDetector {
             MethodLevelSmellDetector methodLevelSmellDetector = new MethodLevelSmellDetector();
 
             System.out.println("Type name: " + type.getBinding().getName());
-            if ("Customer".equals(type.getBinding().getName())) {
+            if ("testFile".equals(type.getBinding().getName())) {
 
                 for (Method method : type.getMethods()) {
                     // Refactor here
@@ -81,9 +78,13 @@ public class CodeSmellDetector {
                     StatementCollector statementCollector = new StatementCollector();
                     node.accept(statementCollector);
                     List<ASTNode> nodes = statementCollector.getNodesCollected();
-                    List<Set<String>> matrix = statementCollector.getMatrix();
+                    TreeMap<Integer, Set<String>> matrix = statementCollector.getMatrix();
 
-                    for(Set<String> s : matrix) {
+                    MethodLOCCalculator methodLOCCalculator = new MethodLOCCalculator();
+                    double loc = methodLOCCalculator.getValue(node);
+
+                    for(Integer key : matrix.keySet()) {
+                        Set<String> s = matrix.get(key);
                         System.out.println("");
                         for(String name: s) {
                             System.out.print(name + ", ");
