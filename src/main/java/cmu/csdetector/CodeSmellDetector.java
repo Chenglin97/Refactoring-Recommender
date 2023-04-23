@@ -80,22 +80,24 @@ public class CodeSmellDetector {
                     List<ASTNode> nodes = statementCollector.getNodesCollected();
                     TreeMap<Integer, Set<String>> matrix = statementCollector.getMatrix();
 
-                    MethodLOCCalculator methodLOCCalculator = new MethodLOCCalculator();
-                    double loc = methodLOCCalculator.getValue(node);
+                    transformMatrix(matrix);
 
-                    for(Integer key : matrix.keySet()) {
-                        Set<String> s = matrix.get(key);
-                        System.out.println("");
-                        for(String name: s) {
-                            System.out.print(name + ", ");
-                        }
-                    }
+
                 }
             }
 
         }
     }
 
+    private void transformMatrix(TreeMap<Integer, Set<String>> matrix){
+        for(Integer key : matrix.keySet()) {
+            Set<String> s = matrix.get(key);
+            System.out.println("");
+            for(String name: s) {
+                System.out.print(name + ", ");
+            }
+        }
+    }
     private void detectSmells(List<Type> allTypes) {
         // homework
         for (Type type : allTypes) {
