@@ -90,13 +90,33 @@ public class CodeSmellDetector {
     }
 
     private void transformMatrix(TreeMap<Integer, Set<String>> matrix){
+        HashMap<String, List<Integer>> transformedMatrix =new HashMap<>();
+
         for(Integer key : matrix.keySet()) {
             Set<String> s = matrix.get(key);
-            System.out.println("");
+            List<Integer> newList = new ArrayList<Integer>();
             for(String name: s) {
-                System.out.print(name + ", ");
+                if(transformedMatrix.keySet().contains(name)){
+                    newList = transformedMatrix.get(name);
+                    newList.add(key);
+                } else{
+                    newList.add(key);
+                }
+                HashSet<Integer> finalSet = new HashSet<>(newList);
+                List<Integer> finalList = new ArrayList<>(finalSet);
+                transformedMatrix.put(name, finalList);
             }
         }
+
+        for(String key : transformedMatrix.keySet()) {
+            List<Integer> s = transformedMatrix.get(key);
+            System.out.println("");
+            System.out.println(s);
+        }
+
+
+
+
     }
     private void detectSmells(List<Type> allTypes) {
         // homework
