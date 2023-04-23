@@ -35,7 +35,7 @@ public class LCOM3Calculator extends LCOMCalculator {
 
         type.accept(mCollector);
         List<MethodDeclaration> methods = mCollector.getNodesCollected();
-
+        this.calculateMetrics(type);
         double new_m = this.m - 1;
         double new_a = this.a;
         for (MethodDeclaration method : methods) {
@@ -51,7 +51,7 @@ public class LCOM3Calculator extends LCOMCalculator {
         double lcom3 = (new_m - (new_sumMA / new_a)) / (new_m - 1);
         return Double.isNaN(lcom3) ? 0 : lcom3;
     }
-    
+
     public Double calculateWithAdditionalMethod(Resource the_class, Method additional_method) {
         TypeDeclaration type = (TypeDeclaration) the_class.getNode();
 
@@ -63,7 +63,7 @@ public class LCOM3Calculator extends LCOMCalculator {
 
         // Add the additional method to the list of methods
         methods.add((MethodDeclaration) additional_method.getNode());
-
+        this.calculateMetrics(type);
         double new_m = this.m + 1; // Increment the count of methods
         double new_a = this.a;
         double new_sumMA = 0;

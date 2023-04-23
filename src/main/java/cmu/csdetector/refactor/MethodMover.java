@@ -13,8 +13,8 @@ public class MethodMover {
         // returns the class the method should be moved to
         // Resource source_class = method.getBelongingClass();
         LCOM3Calculator lcom3Calculator = new LCOM3Calculator();
-        Double source_lcom3 = source_class.getMetricValue(MetricName.LCOM3);
-        System.out.println("old source lcom3: " + source_lcom3);
+        Double old_source_lcom_3 = source_class.getMetricValue(MetricName.LCOM3);
+        System.out.println("old source lcom3: " + old_source_lcom_3);
         for (Resource target_class: classes) {
             Double old_target_lcom_3 = target_class.getMetricValue(MetricName.LCOM3);
 
@@ -25,7 +25,7 @@ public class MethodMover {
             System.out.println("old target lcom3: " + old_target_lcom_3);
             System.out.println("new target lcom3: " + new_target_lcom_3);
 
-            if (new_target_lcom_3 < old_target_lcom_3 && new_source_lcom_3 < source_lcom3) {
+            if (new_target_lcom_3 + new_source_lcom_3 < old_source_lcom_3 + old_target_lcom_3) {
                 return target_class;
             }
         }
