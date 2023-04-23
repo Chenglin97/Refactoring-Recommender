@@ -1,9 +1,12 @@
 package cmu.csdetector;
 
+import cmu.csdetector.ast.visitors.FieldDeclarationCollector;
+import cmu.csdetector.ast.visitors.StatementCollector;
 import cmu.csdetector.console.ToolParameters;
 import cmu.csdetector.console.output.ObservableExclusionStrategy;
 import cmu.csdetector.metrics.MethodMetricValueCollector;
 import cmu.csdetector.metrics.TypeMetricValueCollector;
+import cmu.csdetector.metrics.calculators.method.MethodLOCCalculator;
 import cmu.csdetector.smells.ClassLevelSmellDetector;
 import cmu.csdetector.smells.MethodLevelSmellDetector;
 import cmu.csdetector.smells.Smell;
@@ -15,7 +18,9 @@ import cmu.csdetector.resources.loader.JavaFilesFinder;
 import cmu.csdetector.resources.loader.SourceFile;
 import cmu.csdetector.resources.loader.SourceFilesLoader;
 import org.apache.commons.cli.ParseException;
+import org.eclipse.jdt.core.dom.ASTNode;
 
+import javax.swing.plaf.nimbus.State;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -23,6 +28,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 public class CodeSmellDetector {
 
@@ -55,8 +61,38 @@ public class CodeSmellDetector {
 
         saveSmellsFile(allTypes);
 
+        refactor(allTypes);
+
         System.out.println(new Date());
 
+    }
+
+    private void refactor(List<Type> allTypes) {
+        for (Type type : allTypes) {
+            MethodLevelSmellDetector methodLevelSmellDetector = new MethodLevelSmellDetector();
+
+            System.out.println("Type name: " + type.getBinding().getName());
+            if ("Customer".equals(type.getBinding().getName())) {
+
+                for (Method method : type.getMethods()) {
+                    // Refactor here
+                    ASTNode node = method.getNode();
+
+                    StatementCollector statementCollector = new StatementCollector();
+                    node.accept(statementCollector);
+                    List<ASTNode> nodes = statementCollector.getNodesCollected();
+                    List<Set<String>> matrix = statementCollector.getMatrix();
+
+                    for(Set<String> s : matrix) {
+                        System.out.println("");
+                        for(String name: s) {
+                            System.out.print(name + ", ");
+                        }
+                    }
+                }
+            }
+
+        }
     }
 
     private void detectSmells(List<Type> allTypes) {
