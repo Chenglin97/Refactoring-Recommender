@@ -70,9 +70,9 @@ public class MethodMoverTest {
     @Test
     void MoveMethod() {
         String testClassName = "FeatureEnvyMethod";
-        ArrayList<Type> target_classes = new ArrayList<>();
-        target_classes.add(testTypes.get("FieldAccessedByMethod"));
-        target_classes.add(testTypes.get("RefusedBequestSample"));
+        ArrayList<Resource> target_classes = new ArrayList<>();
+        target_classes.add((Resource) (testTypes.get("FieldAccessedByMethod")));
+        target_classes.add((Resource) testTypes.get("RefusedBequestSample"));
         String testMethodName = "superForeign";
         Method method = testMethods.get(testClassName).get(testMethodName);
         Resource target_class = methodMover.moveMethod(method, testTypes.get(testClassName), target_classes);
