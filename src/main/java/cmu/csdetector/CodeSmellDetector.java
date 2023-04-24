@@ -66,8 +66,8 @@ public class CodeSmellDetector {
 
     }
 
-    private void complexClassHeuristic(List<Type> complexclasses) {
-        for (Type type: complexclasses) {
+    private void complexClassHeuristic(List<Type> complexClasses) {
+        for (Type type: complexClasses) {
             for (Method method: type.getMethods()) {
                 // TODO run heuristics
                 this.findExtractOpportunity(method);
@@ -127,7 +127,7 @@ public class CodeSmellDetector {
                 }
             }
         }
-        System.out.println("Analyze feature envy, " + featureEnvies.size() + " classes has feature envy.");
+        System.out.println("Analyze feature envy, " + featureEnvies.size() + " methods are feature envy.");
         this.featureEnvyHeuristic(featureEnvies);
     }
 
@@ -160,7 +160,7 @@ public class CodeSmellDetector {
         matrix.put("name.equalsIgnoreCase", List.of(24));
         matrix.put("equalsIgnoreCase", List.of(24));
         matrix.put("rec.length", List.of(10));
-//        generateClusters(matrix, 34);
+        generateClusters(matrix, 34);
     }
 
     private void generateClusters(Map<String, List<Integer>> matrix, int loc) {
@@ -280,5 +280,7 @@ public class CodeSmellDetector {
         gson.toJson(smellyTypes, writer);
         writer.close();
     }
+
+    
 
 }

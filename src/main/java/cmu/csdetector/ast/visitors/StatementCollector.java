@@ -92,7 +92,6 @@ public class StatementCollector extends CollectorVisitor<ASTNode> {
 			newIfStatment = new HashSet<>(this.ifStatementStack.peek());
 		}
 		this.ifStatementStack.add(newIfStatment);
-//		this.createNewStatement(node);
 		return true;
 	}
 
