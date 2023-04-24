@@ -146,7 +146,7 @@ public class CodeSmellDetector {
         for (int i = 0; i < sortedLines.size(); i++) {
             if (i == 0 || sortedLines.get(i) - sortedLines.get(i-1) > step) {
                 if (cluster.size() > 1) {
-                    clusters.add(cluster);
+                    clusters.add(List.of(cluster.get(0), cluster.get(cluster.size()-1)));
                 }
                 cluster = new ArrayList<>();
                 cluster.add(sortedLines.get(i));
@@ -155,7 +155,7 @@ public class CodeSmellDetector {
             }
         }
         if (cluster.size() > 1) {
-            clusters.add(cluster);
+            clusters.add(List.of(cluster.get(0), cluster.get(cluster.size()-1)));
         }
         System.out.println(clusters);
     }
