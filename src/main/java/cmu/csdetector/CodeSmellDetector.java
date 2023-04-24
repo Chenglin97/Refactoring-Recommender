@@ -83,9 +83,14 @@ public class CodeSmellDetector {
                     List<ASTNode> nodes = statementCollector.getNodesCollected();
                     TreeMap<Integer, Set<String>> matrix = statementCollector.getMatrix();
 
-                    transformMatrix(matrix);
+                    // transform the treeMap to hashMap which has the variable name as the key instead of line
+                    HashMap<String, List<Integer>> transformedMatrix = transformMatrix(matrix);
 
-
+                    for(String key : transformedMatrix.keySet()) {
+                        List<Integer> s = transformedMatrix.get(key);
+                        System.out.println("");
+                        System.out.println(key +" "+ s);
+                    }
                 }
             }
 
@@ -155,7 +160,7 @@ public class CodeSmellDetector {
         System.out.println(clusters);
     }
 
-    private void transformMatrix(TreeMap<Integer, Set<String>> matrix){
+    private HashMap<String, List<Integer>> transformMatrix(TreeMap<Integer, Set<String>> matrix){
         HashMap<String, List<Integer>> transformedMatrix =new HashMap<>();
 
         for(Integer key : matrix.keySet()) {
@@ -170,19 +175,11 @@ public class CodeSmellDetector {
                 }
                 HashSet<Integer> finalSet = new HashSet<>(newList);
                 List<Integer> finalList = new ArrayList<>(finalSet);
+                Collections.sort(finalList);
                 transformedMatrix.put(name, finalList);
             }
         }
-
-        for(String key : transformedMatrix.keySet()) {
-            List<Integer> s = transformedMatrix.get(key);
-            System.out.println("");
-            System.out.println(s);
-        }
-
-
-
-
+        return transformedMatrix;
     }
     private void detectSmells(List<Type> allTypes) {
         // homework
