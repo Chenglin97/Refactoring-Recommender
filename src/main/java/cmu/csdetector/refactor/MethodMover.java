@@ -42,13 +42,13 @@ public class MethodMover {
             Double new_source_lcom3 = target_class.getMetricValue(MetricName.LCOM3);
 
             // print lcom3 values
-
+            System.out.println("source: " + target_class);
+            System.out.println("canidate: " + new_class);
             System.out.println("old_source_lcom3: " + old_source_lcom3);
             System.out.println("new_source_lcom3: " + new_source_lcom3);
             System.out.println("old_canidate_lcom3: " + old_canidate_lcom3);
-            System.out.println("new_canidate_lcom3: " + new_canidate_lcom3);
+            System.out.println("new_canidate_lcom3: " + new_canidate_lcom3 + "\n");
 
-            System.out.println("new class: " + new_class + "\n");
 
             if ((new_canidate_lcom3 <= old_canidate_lcom3) && (new_source_lcom3 <= old_source_lcom3)) {
                 target_class = new_class;
