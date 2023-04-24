@@ -62,6 +62,8 @@ public class CodeSmellDetector {
 
         refactor(allTypes);
 
+//        testClustering();
+
         System.out.println(new Date());
 
     }
@@ -167,15 +169,20 @@ public class CodeSmellDetector {
 
         for (int step = 1; step <= loc; step++) {
             System.out.println("\nStep: " + step);
+            List<List<Integer>> stepClusters = new ArrayList<>();
             for (String node : matrix.keySet()) {
-                System.out.print(node + ": ");
                 List<Integer> sortedLines = matrix.get(node);
-                generateStepClusters(sortedLines, step);
+                List<List<Integer>> individualClusters = generateStepClusters(sortedLines, step);
+                stepClusters.addAll(individualClusters);
             }
+            stepClusters = new ArrayList<>(new HashSet<>(stepClusters));
+            stepClusters.sort(Comparator.comparingInt((List<Integer> a) -> a.get(0)));
+
+            System.out.println(stepClusters);
         }
     }
 
-    private void generateStepClusters(List<Integer> sortedLines, int step) {
+    private List<List<Integer>> generateStepClusters(List<Integer> sortedLines, int step) {
         List<List<Integer>> clusters = new ArrayList<>();
         List<Integer> cluster = new ArrayList<>();
         for (int i = 0; i < sortedLines.size(); i++) {
@@ -192,7 +199,7 @@ public class CodeSmellDetector {
         if (cluster.size() > 1) {
             clusters.add(List.of(cluster.get(0), cluster.get(cluster.size()-1)));
         }
-        System.out.println(clusters);
+        return clusters;
     }
 
     private HashMap<String, List<Integer>> transformMatrix(TreeMap<Integer, Set<String>> matrix){
