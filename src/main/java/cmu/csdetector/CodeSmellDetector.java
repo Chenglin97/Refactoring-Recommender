@@ -60,6 +60,9 @@ public class CodeSmellDetector {
 
         refactor(allTypes);
 
+        // test the clustering on dummy matrix
+//        testClustering();
+
         System.out.println(new Date());
 
     }
@@ -87,6 +90,69 @@ public class CodeSmellDetector {
             }
 
         }
+    }
+
+    private void testClustering() {
+        Map<String, List<Integer>> matrix = new HashMap<>();
+        matrix.put("manifests", List.of(2,25,29,30,33));
+        matrix.put("rcs", List.of(2,3,5,6,7,8,12,13,14,16,18));
+        matrix.put("length", List.of(2,3,10));
+        matrix.put("rcs.length", List.of(2,3,10));
+        matrix.put("i", List.of(3,5,6,7,8,12,13,14,16,18,29,30));
+        matrix.put("rec", List.of(4,6,8,10,11,25));
+        matrix.put("grabRes", List.of(6));
+        matrix.put("grabNonFileSetRes", List.of(8));
+        matrix.put("j", List.of(10,11,25));
+        matrix.put("name", List.of(11,15,21,24));
+        matrix.put("rec.getName.replace", List.of(11));
+        matrix.put("getName.replace", List.of(11));
+        matrix.put("getName", List.of(11));
+        matrix.put("replace", List.of(11));
+        matrix.put("afs", List.of(13,14,15,16,17,18));
+        matrix.put("equals", List.of(14,16,18));
+        matrix.put("afs.getFullpath", List.of(14,15,16,18));
+        matrix.put("getProj;", List.of(14,15,16,17));
+        matrix.put("name.afs.getFullpath", List.of(15));
+        matrix.put("afs.getPref;", List.of(16,17,18));
+        matrix.put("getPref", List.of(16,17,18));
+        matrix.put("pr", List.of(17,18,19,21));
+        matrix.put("pr.endsWith", List.of(18));
+        matrix.put("endsWith", List.of(18));
+        matrix.put("name.equalsIgnoreCase", List.of(24));
+        matrix.put("equalsIgnoreCase", List.of(24));
+        matrix.put("rec.length", List.of(10));
+        generateClusters(matrix, 34);
+    }
+    private void generateClusters(Map<String, List<Integer>> matrix, int loc) {
+
+        for (int step = 1; step <= loc; step++) {
+            System.out.println("\nStep: " + step);
+            for (String node : matrix.keySet()) {
+                System.out.print(node + ": ");
+                List<Integer> sortedLines = matrix.get(node);
+                generateStepClusters(sortedLines, step);
+            }
+        }
+    }
+
+    private void generateStepClusters(List<Integer> sortedLines, int step) {
+        List<List<Integer>> clusters = new ArrayList<>();
+        List<Integer> cluster = new ArrayList<>();
+        for (int i = 0; i < sortedLines.size(); i++) {
+            if (i == 0 || sortedLines.get(i) - sortedLines.get(i-1) > step) {
+                if (cluster.size() > 1) {
+                    clusters.add(cluster);
+                }
+                cluster = new ArrayList<>();
+                cluster.add(sortedLines.get(i));
+            } else {
+                cluster.add(sortedLines.get(i));
+            }
+        }
+        if (cluster.size() > 1) {
+            clusters.add(cluster);
+        }
+        System.out.println(clusters);
     }
 
     private void transformMatrix(TreeMap<Integer, Set<String>> matrix){
