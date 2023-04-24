@@ -2,11 +2,13 @@ package cmu.csdetector.resources;
 
 import cmu.csdetector.ast.visitors.MethodInvocationVisitor;
 import cmu.csdetector.graph.CallGraph;
+import cmu.csdetector.metrics.MetricName;
 import cmu.csdetector.resources.loader.SourceFile;
 import org.eclipse.jdt.core.dom.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Method extends Resource {
 
@@ -104,6 +106,24 @@ public class Method extends Resource {
     @Override
     public String toString() {
         return "Method [fqn=" + getFullyQualifiedName() + "]";
+    }
+
+    @Override
+    public Method clone() {
+        MethodDeclaration methodDeclaration = (MethodDeclaration) getNode();
+        Method clone = new Method(getSourceFile(), (MethodDeclaration) ASTNode.copySubtree(methodDeclaration.getAST(), methodDeclaration));
+        clone.setFullyQualifiedName(getFullyQualifiedName());
+        clone.setKind(getKind());
+
+        for (Map.Entry<MetricName, Double> entry : getMetricsValues().entrySet()) {
+            clone.addMetricValue(entry.getKey(), entry.getValue());
+        }
+
+        // Copy the parametersTypes list
+        List<String> clonedParametersTypes = new ArrayList<>(parametersTypes);
+        clone.parametersTypes = clonedParametersTypes;
+
+        return clone;
     }
 
 }

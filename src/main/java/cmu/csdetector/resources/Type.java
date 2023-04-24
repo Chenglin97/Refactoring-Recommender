@@ -1,13 +1,11 @@
 package cmu.csdetector.resources;
 
 import cmu.csdetector.ast.visitors.MethodCollector;
+import cmu.csdetector.metrics.MetricName;
 import cmu.csdetector.resources.loader.SourceFile;
 import org.eclipse.jdt.core.dom.*;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Type extends Resource {
 
@@ -120,4 +118,27 @@ public class Type extends Resource {
         return "Type [fqn=" + getFullyQualifiedName() + "]";
     }
 
+    @Override
+    public Type clone() {
+        Type clone = new Type(getSourceFile(), (TypeDeclaration) getNode());
+        clone.setFullyQualifiedName(getFullyQualifiedName());
+        clone.setKind(getKind());
+
+        for (Map.Entry<MetricName, Double> entry : getMetricsValues().entrySet()) {
+            clone.addMetricValue(entry.getKey(), entry.getValue());
+        }
+
+        // Copy the methods list
+        List<Method> clonedMethods = new ArrayList<>();
+        for (Method method : methods) {
+            Method clonedMethod = method.clone();
+            clonedMethods.add(clonedMethod);
+        }
+        clone.methods = clonedMethods;
+
+        Set<Type> clonedChildren = new HashSet<>(children);
+        clone.children = clonedChildren;
+
+        return clone;
+    }
 }
