@@ -19,36 +19,42 @@ import java.util.List;
 
 public class MethodMover {
     public Resource moveMethod(Method method, Resource source_class, ArrayList<Resource> classes) {
-        Double source_lcom3 = source_class.getMetricValue(MetricName.LCOM3);
         Resource target_class = source_class;
-        Double best_lcom3 = 0.0;
+
 
         for (Resource candidate_class : classes) {
-            if (candidate_class.equals(source_class)) {
+            if (candidate_class.equals(target_class)) {
                 continue;
             }
-            Double old_canidate_lcom3 = candidate_class.getMetricValue(MetricName.LCOM3);
-            Double old_source_lcom3 = source_class.getMetricValue(MetricName.LCOM3);
-            MethodDeclaration methodNode = (MethodDeclaration) method.getNode();
-            Resource new_class = simulateMove(methodNode, source_class, candidate_class);
 
             TypeMetricValueCollector collector = new TypeMetricValueCollector();
+            collector.collect(target_class);
+
+            Double old_canidate_lcom3 = candidate_class.getMetricValue(MetricName.LCOM3);
+            Double old_source_lcom3 = target_class.getMetricValue(MetricName.LCOM3);
+            MethodDeclaration methodNode = (MethodDeclaration) method.getNode();
+            Resource new_class = simulateMove(methodNode, target_class, candidate_class);
+
             collector.collect(new_class);
-            TypeMetricValueCollector collector2 = new TypeMetricValueCollector();
-            collector2.collect(source_class);
+            collector.collect(target_class);
 
             Double new_canidate_lcom3 = new_class.getMetricValue(MetricName.LCOM3);
-            Double new_source_lcom3 = source_class.getMetricValue(MetricName.LCOM3);
+            Double new_source_lcom3 = target_class.getMetricValue(MetricName.LCOM3);
 
             // print lcom3 values
 
             System.out.println("old_source_lcom3: " + old_source_lcom3);
             System.out.println("new_source_lcom3: " + new_source_lcom3);
             System.out.println("old_canidate_lcom3: " + old_canidate_lcom3);
-            System.out.println("new_canidate_lcom3: " + new_canidate_lcom3 + "\n");
+            System.out.println("new_canidate_lcom3: " + new_canidate_lcom3);
+
+            System.out.println("new class: " + new_class + "\n");
 
             if ((new_canidate_lcom3 <= old_canidate_lcom3) && (new_source_lcom3 <= old_source_lcom3)) {
                 target_class = new_class;
+                System.out.println("new target class: " + new_class + "\n");
+            } else {
+                simulateMove(methodNode, candidate_class, target_class);
             }
         }
         return target_class;
