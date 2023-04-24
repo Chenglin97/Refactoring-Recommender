@@ -72,7 +72,8 @@ public class CodeSmellDetector {
         for (Type type: complexClasses) {
             for (Method method: type.getMethods()) {
                 // TODO run heuristics
-                this.findExtractOpportunity(method);
+                TreeMap<Integer, List<List<Integer>>> clustersByStep = this.findExtractOpportunity(method);
+                printClusters(clustersByStep);
             }
         }
     }
@@ -80,23 +81,26 @@ public class CodeSmellDetector {
     private void featureEnvyHeuristic(List<Method> featureEnvies) {
         for (Method method: featureEnvies) {
             // TODO run heuristics
-            this.findExtractOpportunity(method);
+            TreeMap<Integer, List<List<Integer>>> clustersByStep = this.findExtractOpportunity(method);
+            printClusters(clustersByStep);
         }
     }
 
-    private void findExtractOpportunity(Method method) {
+    private TreeMap<Integer, List<List<Integer>>> findExtractOpportunity(Method method) {
         ASTNode node = method.getNode();
         StatementCollector statementCollector = new StatementCollector();
         node.accept(statementCollector);
         List<ASTNode> statementNodes = statementCollector.getNodesCollected();
         TreeMap<Integer, Set<String>> matrix = statementCollector.getMatrix();
         HashMap<String, List<Integer>> transformedMatrix = transformMatrix(matrix);
+        return this.generateClusters(transformedMatrix, matrix.size());
+    }
 
-        this.print(transformedMatrix);
-        this.generateClusters(transformedMatrix, matrix.size());
-
-        // TODO return the clusters for refactoring
-//        return null;
+    private void printClusters(TreeMap<Integer, List<List<Integer>>> clustersByStep) {
+        System.out.println("");
+        for (Integer key: clustersByStep.keySet()) {
+            System.out.println("Step: " + key + ", clusters: "+ clustersByStep.get(key));
+        }
     }
 
     private void print(Object object) {
@@ -165,10 +169,10 @@ public class CodeSmellDetector {
         generateClusters(matrix, 34);
     }
 
-    private void generateClusters(Map<String, List<Integer>> matrix, int loc) {
-
+    private TreeMap<Integer, List<List<Integer>>> generateClusters(Map<String, List<Integer>> matrix, int loc) {
+        TreeMap<Integer, List<List<Integer>>> clustersByStep = new TreeMap<>();
         for (int step = 1; step <= loc; step++) {
-            System.out.println("\nStep: " + step);
+//            System.out.println("\nStep: " + step);
             List<List<Integer>> stepClusters = new ArrayList<>();
             for (String node : matrix.keySet()) {
                 List<Integer> sortedLines = matrix.get(node);
@@ -177,9 +181,10 @@ public class CodeSmellDetector {
             }
             stepClusters = new ArrayList<>(new HashSet<>(stepClusters));
             stepClusters.sort(Comparator.comparingInt((List<Integer> a) -> a.get(0)));
-
-            System.out.println(stepClusters);
+            clustersByStep.put(step, stepClusters);
+//            System.out.println(stepClusters);
         }
+        return clustersByStep;
     }
 
     private List<List<Integer>> generateStepClusters(List<Integer> sortedLines, int step) {
@@ -287,7 +292,5 @@ public class CodeSmellDetector {
         gson.toJson(smellyTypes, writer);
         writer.close();
     }
-
-    
 
 }
