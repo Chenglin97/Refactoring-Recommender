@@ -11,9 +11,15 @@ public class StatementCollector extends CollectorVisitor<ASTNode> {
 
 	private TreeMap<Integer, Set<String>> matrix;
 
+	private Stack<Set<String>> ifStatementStack;
+
+	private boolean isIf;
+
 	public StatementCollector() {
 		this.loc = 0;
+		this.isIf = false;
 		this.matrix = new TreeMap<>();
+		this.ifStatementStack = new Stack<>();
 	}
 
 	public TreeMap<Integer, Set<String>> getMatrix() {
@@ -22,9 +28,16 @@ public class StatementCollector extends CollectorVisitor<ASTNode> {
 
 	// add accessible variables and method calls
 	private void addName(String name) {
-		int lastKey = this.matrix.lastKey();
-		Set<String> accessSet = this.matrix.get(lastKey);
-		accessSet.add(name);
+		if (Character.isUpperCase(name.charAt(0))){
+			return;
+		}
+		if (isIf) {
+			this.ifStatementStack.peek().add(name);
+		} else {
+			int lastKey = this.matrix.lastKey();
+			Set<String> accessSet = this.matrix.get(lastKey);
+			accessSet.add(name);
+		}
 	}
 
 	@Override
@@ -71,11 +84,18 @@ public class StatementCollector extends CollectorVisitor<ASTNode> {
 
 	public boolean visit(ForStatement node) {
 		this.createNewStatement(node);
+		// store the simple name
 		return true;
 	}
 
 	public boolean visit(IfStatement node) {
-		this.createNewStatement(node);
+		this.isIf = true;
+		Set<String> newIfStatment = new HashSet<>();
+		if (this.ifStatementStack.size() > 0) {
+			newIfStatment = new HashSet<>(this.ifStatementStack.peek());
+		}
+		this.ifStatementStack.add(newIfStatment);
+//		this.createNewStatement(node);
 		return true;
 	}
 
@@ -118,6 +138,15 @@ public class StatementCollector extends CollectorVisitor<ASTNode> {
 	 * More accessible variables and method calls
 	 */
 
+	public boolean visit(Block node) {
+		if (node.getParent() instanceof IfStatement) {
+			this.createNewStatement(node);
+			this.matrix.put(loc, this.ifStatementStack.peek());
+			this.isIf = false;
+		}
+		return true;
+	}
+
 	public boolean visit(ThisExpression node) {
 		this.addName("this");
 		return true;
@@ -147,25 +176,37 @@ public class StatementCollector extends CollectorVisitor<ASTNode> {
 	public boolean visit(MethodRefParameter node) {
 		return true;
 	}
-	// this.rentals.iterator(), rentals.hasNext()
+
 	public boolean visit(MethodInvocation node) {
-		this.addName(node.getExpression() + "." + node.getName());
+
+		if (node.getExpression() != null) {
+			this.addName(node.getExpression() + "." + node.getName());
+		}
 		return true;
 	}
+
+	public boolean visit(StringLiteral node) {
+		return true;
+	}
+
 
 	public boolean visit(NameQualifiedType node) {
 		return true;
 	}
 
-	// Iterator<Rental>
 	public boolean visit(ParameterizedType node) {
 		return false;
 	}
 
-	//System.out, Movie.NEW_RELEASE
 	public boolean visit(QualifiedName node) {
+		this.addName(node.getQualifier().getFullyQualifiedName() + "." + node.getName());
 		return true;
 	}
 
+	public void endVisit(IfStatement node) {
+		if(this.ifStatementStack.size() > 0) {
+			this.ifStatementStack.pop();
+		}
+	}
 
 }

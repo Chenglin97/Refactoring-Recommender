@@ -91,6 +91,15 @@ public class CodeSmellDetector {
                         System.out.println("");
                         System.out.println(key +" "+ s);
                     }
+
+                    for(Integer key : matrix.keySet()) {
+                        Set<String> s = matrix.get(key);
+                        System.out.print(key + ": ");
+                        for(String name: s) {
+                            System.out.print(name + ", ");
+                        }
+                        System.out.println("");
+                    }
                 }
             }
 
