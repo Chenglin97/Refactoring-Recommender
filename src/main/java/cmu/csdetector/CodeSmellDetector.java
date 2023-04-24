@@ -10,6 +10,8 @@ import cmu.csdetector.metrics.calculators.method.MethodLOCCalculator;
 import cmu.csdetector.smells.ClassLevelSmellDetector;
 import cmu.csdetector.smells.MethodLevelSmellDetector;
 import cmu.csdetector.smells.Smell;
+import cmu.csdetector.smells.detectors.ComplexClass;
+import cmu.csdetector.smells.detectors.FeatureEnvy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import cmu.csdetector.resources.Method;
@@ -18,7 +20,7 @@ import cmu.csdetector.resources.loader.JavaFilesFinder;
 import cmu.csdetector.resources.loader.SourceFile;
 import cmu.csdetector.resources.loader.SourceFilesLoader;
 import org.apache.commons.cli.ParseException;
-import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.*;
 
 import javax.swing.plaf.nimbus.State;
 import java.io.BufferedWriter;
@@ -60,50 +62,73 @@ public class CodeSmellDetector {
 
         refactor(allTypes);
 
-        // test the clustering on dummy matrix
-//        testClustering();
-
         System.out.println(new Date());
 
     }
 
+    private void complexClassHeuristic(List<Type> complexclasses) {
+        for (Type type: complexclasses) {
+            for (Method method: type.getMethods()) {
+                // TODO run heuristics
+                this.findExtractOpportunity(method);
+            }
+        }
+    }
+
+    private void featureEnvyHeuristic(List<Method> featureEnvies) {
+        for (Method method: featureEnvies) {
+            // TODO run heuristics
+            this.findExtractOpportunity(method);
+        }
+    }
+
+    private void findExtractOpportunity(Method method) {
+        ASTNode node = method.getNode();
+        StatementCollector statementCollector = new StatementCollector();
+        node.accept(statementCollector);
+        List<ASTNode> statementNodes = statementCollector.getNodesCollected();
+        TreeMap<Integer, Set<String>> matrix = statementCollector.getMatrix();
+        HashMap<String, List<Integer>> transformedMatrix = transformMatrix(matrix);
+
+        this.print(transformedMatrix);
+        this.generateClusters(transformedMatrix, matrix.size());
+
+        // TODO return the clusters for refactoring
+//        return null;
+    }
+
+    private void print(Object object) {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        String jsonStr = gson.toJson(object);
+        System.out.println(jsonStr);
+    }
+
     private void refactor(List<Type> allTypes) {
+        // get complexClass
+        List<Type> complexClasses = new ArrayList<>();
+        ComplexClass complexClass = new ComplexClass();
         for (Type type : allTypes) {
-            MethodLevelSmellDetector methodLevelSmellDetector = new MethodLevelSmellDetector();
+            List<Smell> smells = complexClass.detect(type);
+            if (smells.size() > 0) {
+                complexClasses.add(type);
+            }
+        }
+        System.out.println("Analyze complex class, " + complexClasses.size() + " classes are complex class.");
+        this.complexClassHeuristic(complexClasses);
 
-            System.out.println("Type name: " + type.getBinding().getName());
-            if ("testFile".equals(type.getBinding().getName())) {
-
-                for (Method method : type.getMethods()) {
-                    // Refactor here
-                    ASTNode node = method.getNode();
-
-                    StatementCollector statementCollector = new StatementCollector();
-                    node.accept(statementCollector);
-                    List<ASTNode> nodes = statementCollector.getNodesCollected();
-                    TreeMap<Integer, Set<String>> matrix = statementCollector.getMatrix();
-
-                    // transform the treeMap to hashMap which has the variable name as the key instead of line
-                    HashMap<String, List<Integer>> transformedMatrix = transformMatrix(matrix);
-
-                    for(String key : transformedMatrix.keySet()) {
-                        List<Integer> s = transformedMatrix.get(key);
-                        System.out.println("");
-                        System.out.println(key +" "+ s);
-                    }
-
-                    for(Integer key : matrix.keySet()) {
-                        Set<String> s = matrix.get(key);
-                        System.out.print(key + ": ");
-                        for(String name: s) {
-                            System.out.print(name + ", ");
-                        }
-                        System.out.println("");
-                    }
+        // get featureEnvy
+        List<Method> featureEnvies = new ArrayList<>();
+        FeatureEnvy detector = new FeatureEnvy();
+        for (Type type : allTypes) {
+            for (Method method : type.getMethods()) {
+                List<Smell> smells = detector.detect(method);
+                if (smells.size() > 0) {
+                    featureEnvies.add(method);
                 }
             }
-
         }
+        System.out.println("Analyze feature envy, " + featureEnvies.size() + " classes has feature envy.");
+        this.featureEnvyHeuristic(featureEnvies);
     }
 
     private void testClustering() {
@@ -135,8 +160,9 @@ public class CodeSmellDetector {
         matrix.put("name.equalsIgnoreCase", List.of(24));
         matrix.put("equalsIgnoreCase", List.of(24));
         matrix.put("rec.length", List.of(10));
-        generateClusters(matrix, 34);
+//        generateClusters(matrix, 34);
     }
+
     private void generateClusters(Map<String, List<Integer>> matrix, int loc) {
 
         for (int step = 1; step <= loc; step++) {
@@ -190,6 +216,7 @@ public class CodeSmellDetector {
         }
         return transformedMatrix;
     }
+
     private void detectSmells(List<Type> allTypes) {
         // homework
         for (Type type : allTypes) {
@@ -253,4 +280,5 @@ public class CodeSmellDetector {
         gson.toJson(smellyTypes, writer);
         writer.close();
     }
+
 }

@@ -59,20 +59,17 @@ public class StatementCollector extends CollectorVisitor<ASTNode> {
 		return true;
 	}
 
-	public boolean visit(EmptyStatement node) {
-		this.createNewStatement(node);
-		return true;
-	}
-
 	public boolean visit(EnhancedForStatement node) {
 		this.createNewStatement(node);
 		return true;
 	}
 
+	// doesn't contain any variables or methods
 	public boolean visit(TryStatement node) {
 		return true;
 	}
 
+	// doesn't contain any variables or methods
 	public boolean visit(CatchClause node) {
 		return false;
 	}
@@ -138,6 +135,7 @@ public class StatementCollector extends CollectorVisitor<ASTNode> {
 	 * More accessible variables and method calls
 	 */
 
+	// for if statement, use block.getParent() to get parent node and then manipulate the parent node
 	public boolean visit(Block node) {
 		if (node.getParent() instanceof IfStatement) {
 			this.createNewStatement(node);
@@ -155,42 +153,16 @@ public class StatementCollector extends CollectorVisitor<ASTNode> {
 	public boolean visit(SimpleType node) {
 		return false;
 	}
-	// not sure   throw new Exception(name);
-	public boolean visit(ClassInstanceCreation node) {
-		return true;
-	}
 
-	public boolean visit(CreationReference node) {
-		return true;
-	}
-	//System.out::println
-	public boolean visit(ExpressionMethodReference node) {
-		return true;
-	}
-	// this.rentals
 	public boolean visit(FieldAccess node) {
 		this.addName(node.getExpression() + "." + node.getName());
 		return true;
 	}
 
-	public boolean visit(MethodRefParameter node) {
-		return true;
-	}
-
 	public boolean visit(MethodInvocation node) {
-
-		if (node.getExpression() != null) {
+		if (node.getExpression() != null && !"\"\"".equals(node.getExpression().toString())) {
 			this.addName(node.getExpression() + "." + node.getName());
 		}
-		return true;
-	}
-
-	public boolean visit(StringLiteral node) {
-		return true;
-	}
-
-
-	public boolean visit(NameQualifiedType node) {
 		return true;
 	}
 
