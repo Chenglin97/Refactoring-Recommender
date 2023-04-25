@@ -7,6 +7,8 @@ import cmu.csdetector.smells.SmellName;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public abstract class Resource extends Observable {
@@ -46,7 +48,9 @@ public abstract class Resource extends Observable {
         return node;
     }
 
-
+    protected Map<MetricName, Double> getMetricsValues() {
+        return metricsValues;
+    }
     /**
      * Line in the source file where node starts (important for code smells)
      * @return line where node starts
@@ -98,4 +102,5 @@ public abstract class Resource extends Observable {
         return false;
     }
 
+    public abstract Resource clone();
 }
