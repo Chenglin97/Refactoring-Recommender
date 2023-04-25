@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MethodMover {
-    public Resource moveMethod(Method method, Resource source_class, ArrayList<Resource> classes) {
+    public Resource moveMethodBasedOnLCOM3(Method method, Resource source_class, ArrayList<Resource> classes) {
         Resource target_class = source_class;
 
 
