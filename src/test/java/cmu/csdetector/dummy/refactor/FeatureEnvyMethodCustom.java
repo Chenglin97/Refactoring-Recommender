@@ -55,16 +55,15 @@ public class FeatureEnvyMethodCustom {
         Integer.bitCount(12);
     }
 
-    public void superForeign(int a) {
-        foreign1.a();
-        foreign1.b();
-        foreign1.c();
-        new String().toCharArray();
-        new String().toLowerCase();
-        Integer.bitCount(12);
-        new String().toCharArray();
-        new String().toLowerCase();
-        Integer.bitCount(12);
+    public void superForeign() {
+        String foreign1Attribute1 = foreign1.fieldAccessedByMethodCustomAttribute;
+        System.out.println(foreign1Attribute1);
+        String foreign1Attribute2 = foreign1.fieldAccessedByMethodCustomAttribute;
+        System.out.println(foreign1Attribute2);
+        String foreign1Attribute3 = foreign1.fieldAccessedByMethodCustomAttribute;
+        System.out.println(foreign1Attribute3);
+        String foreign1Attribute4 = foreign1.fieldAccessedByMethodCustomAttribute;
+        System.out.println(foreign1Attribute4);
     }
 
     public void mostLocal(int a, int b) {

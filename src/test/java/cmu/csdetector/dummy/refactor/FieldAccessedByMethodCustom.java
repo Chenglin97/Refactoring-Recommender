@@ -4,7 +4,7 @@ import cmu.csdetector.dummy.smells.SuperDummy;
 import org.apache.commons.io.FileUtils;
 
 public class FieldAccessedByMethodCustom extends SuperDummyCustom {
-
+	protected String fieldAccessedByMethodCustomAttribute = "FieldAccessedByMethodCustomAttribute";
 	private String b;
 	
 	private Object c;
