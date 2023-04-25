@@ -191,12 +191,14 @@ public class CodeSmellDetector {
         if (baseClusters.isEmpty()) return baseClusters;
         baseClusters.sort(Comparator.comparingInt((List<Integer> a) -> a.get(0)));
         List<List<Integer>> mergedClusters = new ArrayList<>();
+
+        // Old Algorithm
         int low = baseClusters.get(0).get(0);
         int high = baseClusters.get(0).get(1);
         for (int i = 1; i < baseClusters.size(); i++) {
             int i_low = baseClusters.get(i).get(0);
             int i_high = baseClusters.get(i).get(1);
-            if (i_low < high) {
+            if (i_low <= high) {
                 if (high < i_high) high = i_high;
             } else {
                 mergedClusters.add(List.of(low, high));
@@ -205,6 +207,32 @@ public class CodeSmellDetector {
             }
         }
         mergedClusters.add(List.of(low, high));
+
+        // New Algorithm
+//        for (int i = 0; i < baseClusters.size(); i++) {
+//            int low = baseClusters.get(i).get(0);
+//            int i_high = baseClusters.get(i).get(1);
+//            int high = i_high;
+//            for (int j = i+1; j < baseClusters.size(); j++) {
+//                int j_low = baseClusters.get(j).get(0);
+//                int j_high = baseClusters.get(j).get(1);
+//                if (j_low <= high) {
+//                    if (j_low <= i_high) {
+//                        if (i_high < j_high) {
+//                            mergedClusters.add(List.of(low, j_high));
+//                        }
+//                    }
+//                    if (high < j_high) {
+//                        high = j_high;
+//                        mergedClusters.add(List.of(low, high));
+//                    }
+//                } else {
+//                    mergedClusters.add(List.of(low, high));
+//                    break;
+//                }
+//            }
+//        }
+
         mergedClusters.addAll(baseClusters);
         mergedClusters = new ArrayList<>(new HashSet<>(mergedClusters));
         mergedClusters.sort(Comparator.comparingInt((List<Integer> a) -> a.get(0)));
