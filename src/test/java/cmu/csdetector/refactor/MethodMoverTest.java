@@ -23,7 +23,7 @@ import java.util.Map;
 
 public class MethodMoverTest {
 
-    public static File file = new File("src/test/java/cmu/csdetector/dummy/smells");
+    public static File file = new File("src/test/java/cmu/csdetector/dummy");
     public static Map<String, Type> testTypes = new HashMap<>();
     public static Map<String, Map<String, Method>> testMethods = new HashMap<>();
 
@@ -78,6 +78,20 @@ public class MethodMoverTest {
         Resource target_class = methodMover.moveMethodBasedOnLCOM3(method, testTypes.get(testClassName), target_classes);
 
         Assertions.assertEquals(testTypes.get("FeatureEnvyMethod"), target_class);
+    }
+
+
+    @Test
+    void MoveMethodCustom() {
+        String testClassName = "FeatureEnvyMethodCustom";
+        ArrayList<Resource> target_classes = new ArrayList<>();
+        target_classes.add((Resource) (testTypes.get("FieldAccessedByMethodCustom")));
+        target_classes.add((Resource) testTypes.get("RefusedBequestSampleCustom"));
+        String testMethodName = "superForeign";
+        Method method = testMethods.get(testClassName).get(testMethodName);
+        Resource target_class = methodMover.moveMethodBasedOnLCOM3(method, testTypes.get(testClassName), target_classes);
+
+        Assertions.assertEquals(testTypes.get("FeatureEnvyMethodCustom"), target_class);
     }
 
 }
