@@ -37,8 +37,8 @@ public class MethodMover {
             Resource copied_target_class = resourcePair.getSourceClassCopy();
             Resource copied_candidate_class = resourcePair.getTargetClassCopy();
 
-            // collector.collect(copied_target_class);
-            // collector.collect(copied_candidate_class);
+            collector.collect(copied_target_class);
+            collector.collect(copied_candidate_class);
 
             Double new_source_lcom3 = copied_target_class.getMetricValue(MetricName.LCOM3);
             Double new_candidate_lcom3 = copied_candidate_class.getMetricValue(MetricName.LCOM3);
