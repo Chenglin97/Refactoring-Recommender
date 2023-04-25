@@ -62,7 +62,7 @@ public class CodeSmellDetector {
 
         refactor(allTypes);
 
-//        testClustering();
+        testClustering();
 
         System.out.println(new Date());
 
@@ -172,7 +172,7 @@ public class CodeSmellDetector {
     private TreeMap<Integer, List<List<Integer>>> generateClusters(Map<String, List<Integer>> matrix, int loc) {
         TreeMap<Integer, List<List<Integer>>> clustersByStep = new TreeMap<>();
         for (int step = 1; step <= loc; step++) {
-//            System.out.println("\nStep: " + step);
+            System.out.println("\nStep: " + step);
             List<List<Integer>> stepClusters = new ArrayList<>();
             for (String node : matrix.keySet()) {
                 List<Integer> sortedLines = matrix.get(node);
@@ -180,11 +180,35 @@ public class CodeSmellDetector {
                 stepClusters.addAll(individualClusters);
             }
             stepClusters = new ArrayList<>(new HashSet<>(stepClusters));
-            stepClusters.sort(Comparator.comparingInt((List<Integer> a) -> a.get(0)));
+            stepClusters = mergeAndSortClusters(stepClusters);
             clustersByStep.put(step, stepClusters);
-//            System.out.println(stepClusters);
+            System.out.println(stepClusters);
         }
         return clustersByStep;
+    }
+
+    private List<List<Integer>> mergeAndSortClusters(List<List<Integer>> baseClusters) {
+        if (baseClusters.isEmpty()) return baseClusters;
+        baseClusters.sort(Comparator.comparingInt((List<Integer> a) -> a.get(0)));
+        List<List<Integer>> mergedClusters = new ArrayList<>();
+        int low = baseClusters.get(0).get(0);
+        int high = baseClusters.get(0).get(1);
+        for (int i = 1; i < baseClusters.size(); i++) {
+            int i_low = baseClusters.get(i).get(0);
+            int i_high = baseClusters.get(i).get(1);
+            if (i_low < high) {
+                if (high < i_high) high = i_high;
+            } else {
+                mergedClusters.add(List.of(low, high));
+                low = i_low;
+                high = i_high;
+            }
+        }
+        mergedClusters.add(List.of(low, high));
+        mergedClusters.addAll(baseClusters);
+        mergedClusters = new ArrayList<>(new HashSet<>(mergedClusters));
+        mergedClusters.sort(Comparator.comparingInt((List<Integer> a) -> a.get(0)));
+        return mergedClusters;
     }
 
     private List<List<Integer>> generateStepClusters(List<Integer> sortedLines, int step) {
