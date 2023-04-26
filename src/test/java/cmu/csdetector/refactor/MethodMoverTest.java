@@ -110,7 +110,7 @@ public class MethodMoverTest {
         ArrayList<Resource> target_classes = new ArrayList<>();
         target_classes.add((Resource) (testTypes.get("FieldAccessedByMethodCustom")));
         target_classes.add((Resource) testTypes.get("RefusedBequestSampleCustom"));
-        String testMethodName = "mostLocal";
+        String testMethodName = "superLocal";
         Method method = testMethods.get(testClassName).get(testMethodName);
         Resource target_class = methodMover.moveMethod(method.getNode(), testTypes.get(testClassName), target_classes);
 

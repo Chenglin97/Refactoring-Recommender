@@ -39,13 +39,16 @@ public class LCOM3Calculator extends LCOMCalculator {
         double new_m = this.m - 1;
         double new_a = this.a;
         double new_sumMA = this.sumMA;
-        ExternalClassVariableCollector ecvCollector = new ExternalClassVariableCollector();
+//        ExternalClassVariableCollector ecvCollector = new ExternalClassVariableCollector();
+//        MethodDeclaration methodDeclaration = (MethodDeclaration) method_node;
+//        methodDeclaration.accept(ecvCollector);
+//        Map<String, Integer> externalClassVariableCount= ecvCollector.getExternalClassVariableCount();
+//        String the_class_name = ((TypeDeclaration) the_class.getNode()).getName().toString();
+//        new_sumMA -= externalClassVariableCount.getOrDefault(the_class_name, 0);
+        ClassFieldAccessCollector cfaCollector = new ClassFieldAccessCollector((TypeDeclaration) the_class.getNode());
         MethodDeclaration methodDeclaration = (MethodDeclaration) method_node;
-        methodDeclaration.accept(ecvCollector);
-        Map<String, Integer> externalClassVariableCount= ecvCollector.getExternalClassVariableCount();
-        String the_class_name = ((TypeDeclaration) the_class.getNode()).getName().toString();
-        new_sumMA -= externalClassVariableCount.getOrDefault(the_class_name, 0);
-
+        methodDeclaration.accept(cfaCollector);
+        new_sumMA -= cfaCollector.getLocalReferences().size();
         double lcom3 = (new_m - (new_sumMA / new_a)) / (new_m - 1);
         return Double.isNaN(lcom3) ? 0 : lcom3;
     }
