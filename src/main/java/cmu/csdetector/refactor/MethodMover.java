@@ -6,6 +6,8 @@ import cmu.csdetector.resources.Method;
 import cmu.csdetector.resources.Resource;
 import cmu.csdetector.resources.Type;
 
+import cmu.csdetector.smells.Smell;
+import cmu.csdetector.smells.detectors.FeatureEnvy;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
@@ -79,4 +81,20 @@ public class MethodMover {
 
         return new ResourcePair(targetClassCopy, sourceClassCopy);
     }
+
+    public Resource moveMethodBasedOnFeatureEnvy(Method method, Resource source_class, ArrayList<Resource> classes) {
+        Resource target_class = source_class;
+
+        FeatureEnvy featureEnvyDetector = new FeatureEnvy();
+
+        String testClassName = "FeatureEnvyMethod";
+        String testMethodName = "superForeign";
+        List<Smell> smells = featureEnvyDetector.detect(method);
+
+        // print smells
+        System.out.println("smells: " + smells);
+        return target_class;
+    }
+
+
 }

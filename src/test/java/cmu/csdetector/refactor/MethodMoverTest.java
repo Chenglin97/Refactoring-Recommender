@@ -80,4 +80,17 @@ public class MethodMoverTest {
         Assertions.assertEquals(testTypes.get("FeatureEnvyMethod"), target_class);
     }
 
+    @Test
+    void moveMethodBasedOnFeatureEnvy() {
+        String testClassName = "FeatureEnvyMethod";
+        ArrayList<Resource> target_classes = new ArrayList<>();
+        target_classes.add((Resource) (testTypes.get("FieldAccessedByMethod")));
+        target_classes.add((Resource) testTypes.get("RefusedBequestSample"));
+        String testMethodName = "superForeign";
+        Method method = testMethods.get(testClassName).get(testMethodName);
+        Resource target_class = methodMover.moveMethodBasedOnFeatureEnvy(method, testTypes.get(testClassName), target_classes);
+
+        Assertions.assertEquals(testTypes.get("FieldAccessedByMethod"), target_class);
+    }
+
 }
