@@ -1,7 +1,4 @@
-package cmu.csdetector.dummy.refactor;
-
-import cmu.csdetector.dummy.smells.FieldAccessedByMethod;
-import cmu.csdetector.dummy.smells.RefusedBequestSample;
+package cmu.csdetector.dummy.refactorCustom;
 
 
 public class FeatureEnvyMethodCustom {

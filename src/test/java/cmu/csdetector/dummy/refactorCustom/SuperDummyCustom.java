@@ -1,4 +1,4 @@
-package cmu.csdetector.dummy.refactor;
+package cmu.csdetector.dummy.refactorCustom;
 
 public abstract class SuperDummyCustom {
 	protected String a;
