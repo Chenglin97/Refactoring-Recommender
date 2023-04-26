@@ -72,7 +72,7 @@ public class MethodMoverTest {
         target_classes.add((Resource) testTypes.get("RefusedBequestSample"));
         String testMethodName = "superForeign";
         Method method = testMethods.get(testClassName).get(testMethodName);
-        Resource target_class = methodMover.moveMethod(method, testTypes.get(testClassName), target_classes);
+        Resource target_class = methodMover.moveMethod(method.getNode(), testTypes.get(testClassName), target_classes);
 
         Assertions.assertEquals(testTypes.get("FieldAccessedByMethod"), target_class);
     }
@@ -86,7 +86,7 @@ public class MethodMoverTest {
         target_classes.add((Resource) testTypes.get("RefusedBequestSampleCustom"));
         String testMethodName = "superForeign";
         Method method = testMethods.get(testClassName).get(testMethodName);
-        Resource target_class = methodMover.moveMethod(method, testTypes.get(testClassName), target_classes);
+        Resource target_class = methodMover.moveMethod(method.getNode(), testTypes.get(testClassName), target_classes);
 
         Assertions.assertEquals(testTypes.get("FieldAccessedByMethodCustom"), target_class);
     }
@@ -99,7 +99,7 @@ public class MethodMoverTest {
         target_classes.add((Resource) testTypes.get("RefusedBequestSampleCustom"));
         String testMethodName = "mostForeign";
         Method method = testMethods.get(testClassName).get(testMethodName);
-        Resource target_class = methodMover.moveMethod(method, testTypes.get(testClassName), target_classes);
+        Resource target_class = methodMover.moveMethod(method.getNode(), testTypes.get(testClassName), target_classes);
 
         Assertions.assertEquals(testTypes.get("FieldAccessedByMethodCustom"), target_class);
     }
@@ -112,7 +112,7 @@ public class MethodMoverTest {
         target_classes.add((Resource) testTypes.get("RefusedBequestSampleCustom"));
         String testMethodName = "mostLocal";
         Method method = testMethods.get(testClassName).get(testMethodName);
-        Resource target_class = methodMover.moveMethod(method, testTypes.get(testClassName), target_classes);
+        Resource target_class = methodMover.moveMethod(method.getNode(), testTypes.get(testClassName), target_classes);
 
         Assertions.assertEquals(testTypes.get("FeatureEnvyMethodCustom"), target_class);
     }

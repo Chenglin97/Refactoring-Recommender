@@ -29,7 +29,7 @@ public class LCOM3Calculator extends LCOMCalculator {
         return MetricName.LCOM3;
     }
 
-    public Double calculateWithoutMethod(Resource the_class, Method the_method) {
+    public Double calculateWithoutMethod(Resource the_class, ASTNode method_node) {
         TypeDeclaration type = (TypeDeclaration) the_class.getNode();
 
         MethodCollector mCollector = new MethodCollector();
@@ -40,7 +40,7 @@ public class LCOM3Calculator extends LCOMCalculator {
         double new_a = this.a;
         double new_sumMA = this.sumMA;
         ExternalClassVariableCollector ecvCollector = new ExternalClassVariableCollector();
-        MethodDeclaration methodDeclaration = (MethodDeclaration) the_method.getNode();
+        MethodDeclaration methodDeclaration = (MethodDeclaration) method_node;
         methodDeclaration.accept(ecvCollector);
         Map<String, Integer> externalClassVariableCount= ecvCollector.getExternalClassVariableCount();
         String the_class_name = ((TypeDeclaration) the_class.getNode()).getName().toString();
@@ -50,7 +50,7 @@ public class LCOM3Calculator extends LCOMCalculator {
         return Double.isNaN(lcom3) ? 0 : lcom3;
     }
 
-    public Double calculateWithAdditionalMethod(Resource the_class, Method additional_method) {
+    public Double calculateWithAdditionalMethod(Resource the_class, ASTNode method_node) {
         TypeDeclaration type = (TypeDeclaration) the_class.getNode();
 
         MethodCollector mCollector = new MethodCollector();
@@ -59,14 +59,14 @@ public class LCOM3Calculator extends LCOMCalculator {
         List<MethodDeclaration> methods = mCollector.getNodesCollected();
 
         // Add the additional method to the list of methods
-        methods.add((MethodDeclaration) additional_method.getNode());
+        methods.add((MethodDeclaration) method_node);
         this.calculateMetrics(type);
         double new_m = this.m + 1; // Increment the count of methods
         double new_a = this.a;
         double new_sumMA = this.sumMA;
 
         ExternalClassVariableCollector ecvCollector = new ExternalClassVariableCollector();
-        MethodDeclaration methodDeclaration = (MethodDeclaration) additional_method.getNode();
+        MethodDeclaration methodDeclaration = (MethodDeclaration) method_node;
         methodDeclaration.accept(ecvCollector);
         Map<String, Integer> externalClassVariableCount= ecvCollector.getExternalClassVariableCount();
         String the_class_name = ((TypeDeclaration) the_class.getNode()).getName().toString();

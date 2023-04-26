@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MethodMover {
-    public Resource moveMethod(Method method, Resource source_class, ArrayList<Resource> classes) {
+    public Resource moveMethod(ASTNode method_node, Resource source_class, ArrayList<Resource> classes) {
         // returns the class the method should be moved to
         // Resource source_class = method.getBelongingClass();
 
@@ -30,8 +30,8 @@ public class MethodMover {
         for (Resource target_class: classes) {
             Double old_target_lcom_3 = target_class.getMetricValue(MetricName.LCOM3);
 
-            Double new_source_lcom_3 = lcom3Calculator.calculateWithoutMethod(source_class, method);
-            Double new_target_lcom_3 = lcom3Calculator.calculateWithAdditionalMethod(target_class, method);
+            Double new_source_lcom_3 = lcom3Calculator.calculateWithoutMethod(source_class, method_node);
+            Double new_target_lcom_3 = lcom3Calculator.calculateWithAdditionalMethod(target_class, method_node);
 
             System.out.println("target class: " + target_class.getFullyQualifiedName());
             System.out.println("old source lcom3: " + old_source_lcom_3);
