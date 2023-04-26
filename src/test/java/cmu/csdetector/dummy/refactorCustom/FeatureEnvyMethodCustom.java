@@ -61,14 +61,6 @@ public class FeatureEnvyMethodCustom {
         System.out.println(foreign1Attribute3);
         String foreign1Attribute4 = foreign1.fieldAccessedByMethodCustomAttribute;
         System.out.println(foreign1Attribute4);
-        foreign1Attribute1 = foreign1.fieldAccessedByMethodCustomAttribute;
-        System.out.println(foreign1Attribute1);
-        foreign1Attribute2 = foreign1.fieldAccessedByMethodCustomAttribute;
-        System.out.println(foreign1Attribute2);
-        foreign1Attribute3 = foreign1.fieldAccessedByMethodCustomAttribute;
-        System.out.println(foreign1Attribute3);
-        foreign1Attribute4 = foreign1.fieldAccessedByMethodCustomAttribute;
-        System.out.println(foreign1Attribute4);
     }
 
     public void mostLocal(int a, int b) {

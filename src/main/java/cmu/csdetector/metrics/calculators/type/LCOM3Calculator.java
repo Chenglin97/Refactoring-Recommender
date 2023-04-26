@@ -78,16 +78,6 @@ public class LCOM3Calculator extends LCOMCalculator {
         new_sumMA = externalClassVariableCount.getOrDefault(the_class_name, 0);
 
         new_sumMA += sumMA;
-//        for (MethodDeclaration method : methods) {
-//            cfaCollector.clearLocalReferences();
-//            method.accept(cfaCollector);
-//            new_sumMA += cfaCollector.getLocalReferences().size();
-//        }
-        for (MethodDeclaration method : methods) {
-            cfaCollector.clearLocalReferences();
-            method.accept(cfaCollector);
-            new_sumMA += cfaCollector.getLocalReferences().size();
-        }
 
         double lcom3 = (new_m - (new_sumMA / new_a)) / (new_m - 1);
         return Double.isNaN(lcom3) ? 0 : lcom3;

@@ -4,9 +4,6 @@ package cmu.csdetector.refactor;
 import cmu.csdetector.resources.Method;
 import cmu.csdetector.resources.Resource;
 import cmu.csdetector.resources.Type;
-import cmu.csdetector.smells.Smell;
-import cmu.csdetector.smells.detectors.FeatureEnvy;
-import cmu.csdetector.refactor.MethodMover;
 import cmu.csdetector.util.GenericCollector;
 import cmu.csdetector.util.TypeLoader;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -75,9 +72,9 @@ public class MethodMoverTest {
         target_classes.add((Resource) testTypes.get("RefusedBequestSample"));
         String testMethodName = "superForeign";
         Method method = testMethods.get(testClassName).get(testMethodName);
-        Resource target_class = methodMover.moveMethodBasedOnLCOM3(method, testTypes.get(testClassName), target_classes);
+        Resource target_class = methodMover.moveMethod(method, testTypes.get(testClassName), target_classes);
 
-        Assertions.assertEquals(testTypes.get("FeatureEnvyMethod"), target_class);
+        Assertions.assertEquals(testTypes.get("FieldAccessedByMethod"), target_class);
     }
 
 
@@ -91,7 +88,7 @@ public class MethodMoverTest {
         Method method = testMethods.get(testClassName).get(testMethodName);
         Resource target_class = methodMover.moveMethod(method, testTypes.get(testClassName), target_classes);
 
-        Assertions.assertEquals(testTypes.get("FeatureEnvyMethodCustom"), target_class);
+        Assertions.assertEquals(testTypes.get("FieldAccessedByMethodCustom"), target_class);
     }
 
 }
