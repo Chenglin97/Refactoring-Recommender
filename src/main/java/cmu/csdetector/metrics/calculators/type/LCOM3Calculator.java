@@ -71,7 +71,7 @@ public class LCOM3Calculator extends LCOMCalculator {
         for (MethodDeclaration method : methods) {
             cfaCollector.clearLocalReferences();
             method.accept(cfaCollector);
-            new_sumMA += cfaCollector.getNodesCollected().size();
+            new_sumMA += cfaCollector.getLocalReferences().size();
         }
 
         double lcom3 = (new_m - (new_sumMA / new_a)) / (new_m - 1);
