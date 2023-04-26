@@ -2,15 +2,17 @@ package cmu.csdetector.refactor;
 
 import cmu.csdetector.ast.visitors.StatementCollector;
 import cmu.csdetector.resources.Method;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.IfStatement;
 
 import java.util.*;
 
 public class Heuristic1 {
 
-    private Method method;
+    private final Method method;
     private List<ASTNode> statementNodes;
-    private TreeMap<Integer, List<List<Integer>>> clusters;
+    private Set<List<Integer>> clusters = new HashSet<>();
 
     public Heuristic1(Method method) {
         this.method = method;
@@ -25,13 +27,58 @@ public class Heuristic1 {
         HashMap<String, List<Integer>> transformedMatrix = this.transformMatrix(matrix);
 
         // Generate clusters
-        this.clusters = this.generateClusters(transformedMatrix, matrix.size());
+        this.generateClusters(transformedMatrix, matrix.size());
+        System.out.println("\nAll Clusters: " + this.clusters);
+
+        // Remove invalid clusters
+//        System.out.println("Nodes: " + ASTNode.nodeClassForType(statementNodes.get(3).getParent().getNodeType()));
+//        System.out.println("Nodes: " + statementNodes.get(19));
+//        for (ASTNode ancestor : this.getAncestors(statementNodes.get(7))) {
+//            System.out.println(ASTNode.nodeClassForType(ancestor.getNodeType()));
+//        }
+        this.removeInvalidClusters();
+        System.out.println("\nValid Clusters: " + this.clusters);
 
         // TODO ranking by using statementNodes, clusters
 
         List<Integer> bestCluster = null;
 
         return bestCluster;
+    }
+
+    private void removeInvalidClusters() {
+        Set<List<Integer>> invalidClusters = new HashSet<>();
+        for (List<Integer> cluster : this.clusters) {
+            if (!this.isSyntacticallyValid(cluster)) invalidClusters.add(cluster);
+        }
+        this.clusters.removeAll(invalidClusters);
+    }
+    private boolean isSyntacticallyValid(List<Integer> cluster) {
+        ASTNode start = this.statementNodes.get(cluster.get(0)-1);
+        if (ASTNode.nodeClassForType(start.getParent().getNodeType()) == IfStatement.class) start = start.getParent();
+        ASTNode end = this.statementNodes.get(cluster.get(1)-1);
+        ASTNode next = (cluster.get(1) < this.statementNodes.size()) ? this.statementNodes.get(cluster.get(1)) : null;
+        if (next == null || this.getAncestors(start).contains(next.getParent())) {
+            int c = (int)Math.signum(this.getAncestors(end).size() - this.getAncestors(start).size());
+            switch (c) {
+                case -1:
+                    break;
+                case 0:
+                    if (end.getParent().equals(start.getParent())) return true;
+                    break;
+                case 1:
+                    return true;
+            }
+        }
+        return false;
+    }
+    private List<ASTNode> getAncestors(ASTNode node) {
+        List<ASTNode> ancestors = new ArrayList<>();
+        while (node.getParent() != null) {
+            node = node.getParent();
+            ancestors.add(node);
+        }
+        return ancestors;
     }
 
     public void testClustering() {
@@ -66,8 +113,8 @@ public class Heuristic1 {
         generateClusters(matrix, 34);
     }
 
-    private TreeMap<Integer, List<List<Integer>>> generateClusters(Map<String, List<Integer>> matrix, int loc) {
-        TreeMap<Integer, List<List<Integer>>> clustersByStep = new TreeMap<>();
+    private void generateClusters(Map<String, List<Integer>> matrix, int loc) {
+//        TreeMap<Integer, List<List<Integer>>> clustersByStep = new TreeMap<>();
         for (int step = 1; step <= loc; step++) {
             System.out.print("\nStep " + step + ": ");
             List<List<Integer>> stepClusters = new ArrayList<>();
@@ -78,10 +125,11 @@ public class Heuristic1 {
             }
             stepClusters = new ArrayList<>(new HashSet<>(stepClusters));
             stepClusters = mergeAndSortClusters(stepClusters);
-            clustersByStep.put(step, stepClusters);
+            this.clusters.addAll(stepClusters);
+//            clustersByStep.put(step, stepClusters);
+
             System.out.println(stepClusters);
         }
-        return clustersByStep;
     }
 
     private List<List<Integer>> mergeAndSortClusters(List<List<Integer>> baseClusters) {
@@ -91,45 +139,45 @@ public class Heuristic1 {
         List<List<Integer>> mergedClusters = new ArrayList<>();
 
         // Old Algorithm
-        int low = baseClusters.get(0).get(0);
-        int high = baseClusters.get(0).get(1);
-        for (int i = 1; i < baseClusters.size(); i++) {
-            int i_low = baseClusters.get(i).get(0);
-            int i_high = baseClusters.get(i).get(1);
-            if (i_low <= high) {
-                if (high < i_high) high = i_high;
-            } else {
-                mergedClusters.add(List.of(low, high));
-                low = i_low;
-                high = i_high;
-            }
-        }
-        mergedClusters.add(List.of(low, high));
-
-        // New Algorithm
-//        for (int i = 0; i < baseClusters.size(); i++) {
-//            int low = baseClusters.get(i).get(0);
+//        int low = baseClusters.get(0).get(0);
+//        int high = baseClusters.get(0).get(1);
+//        for (int i = 1; i < baseClusters.size(); i++) {
+//            int i_low = baseClusters.get(i).get(0);
 //            int i_high = baseClusters.get(i).get(1);
-//            int high = i_high;
-//            for (int j = i+1; j < baseClusters.size(); j++) {
-//                int j_low = baseClusters.get(j).get(0);
-//                int j_high = baseClusters.get(j).get(1);
-//                if (j_low <= high) {
-//                    if (j_low <= i_high) {
-//                        if (i_high < j_high) {
-//                            mergedClusters.add(List.of(low, j_high));
-//                        }
-//                    }
-//                    if (high < j_high) {
-//                        high = j_high;
-//                        mergedClusters.add(List.of(low, high));
-//                    }
-//                } else {
-//                    mergedClusters.add(List.of(low, high));
-//                    break;
-//                }
+//            if (i_low <= high) {
+//                if (high < i_high) high = i_high;
+//            } else {
+//                mergedClusters.add(List.of(low, high));
+//                low = i_low;
+//                high = i_high;
 //            }
 //        }
+//        mergedClusters.add(List.of(low, high));
+
+        // New Algorithm
+        for (int i = 0; i < baseClusters.size(); i++) {
+            int low = baseClusters.get(i).get(0);
+            int i_high = baseClusters.get(i).get(1);
+            int high = i_high;
+            for (int j = i+1; j < baseClusters.size(); j++) {
+                int j_low = baseClusters.get(j).get(0);
+                int j_high = baseClusters.get(j).get(1);
+                if (j_low <= high) {
+                    if (j_low <= i_high) {
+                        if (i_high < j_high) {
+                            mergedClusters.add(List.of(low, j_high));
+                        }
+                    }
+                    if (high < j_high) {
+                        high = j_high;
+                        mergedClusters.add(List.of(low, high));
+                    }
+                } else {
+                    mergedClusters.add(List.of(low, high));
+                    break;
+                }
+            }
+        }
 
         mergedClusters.addAll(baseClusters);
         mergedClusters = new ArrayList<>(new HashSet<>(mergedClusters));
