@@ -33,22 +33,18 @@ public class LCOM3Calculator extends LCOMCalculator {
         TypeDeclaration type = (TypeDeclaration) the_class.getNode();
 
         MethodCollector mCollector = new MethodCollector();
-        ClassFieldAccessCollector cfaCollector = new ClassFieldAccessCollector(type);
 
         type.accept(mCollector);
-        List<MethodDeclaration> methods = mCollector.getNodesCollected();
         this.calculateMetrics(type);
         double new_m = this.m - 1;
         double new_a = this.a;
-        for (MethodDeclaration method : methods) {
-            if (method.equals(the_method.getNode())) {
-                continue;
-            }
-            cfaCollector.clearLocalReferences();
-            method.accept(cfaCollector);
-
-        }
-        double new_sumMA = cfaCollector.getNodesCollected().size();
+        double new_sumMA = this.sumMA;
+        ExternalClassVariableCollector ecvCollector = new ExternalClassVariableCollector();
+        MethodDeclaration methodDeclaration = (MethodDeclaration) the_method.getNode();
+        methodDeclaration.accept(ecvCollector);
+        Map<String, Integer> externalClassVariableCount= ecvCollector.getExternalClassVariableCount();
+        String the_class_name = ((TypeDeclaration) the_class.getNode()).getName().toString();
+        new_sumMA -= externalClassVariableCount.getOrDefault(the_class_name, 0);
 
         double lcom3 = (new_m - (new_sumMA / new_a)) / (new_m - 1);
         return Double.isNaN(lcom3) ? 0 : lcom3;
@@ -58,7 +54,6 @@ public class LCOM3Calculator extends LCOMCalculator {
         TypeDeclaration type = (TypeDeclaration) the_class.getNode();
 
         MethodCollector mCollector = new MethodCollector();
-        ClassFieldAccessCollector cfaCollector = new ClassFieldAccessCollector(type);
 
         type.accept(mCollector);
         List<MethodDeclaration> methods = mCollector.getNodesCollected();
@@ -68,16 +63,15 @@ public class LCOM3Calculator extends LCOMCalculator {
         this.calculateMetrics(type);
         double new_m = this.m + 1; // Increment the count of methods
         double new_a = this.a;
-        double new_sumMA = 0;
+        double new_sumMA = this.sumMA;
 
         ExternalClassVariableCollector ecvCollector = new ExternalClassVariableCollector();
         MethodDeclaration methodDeclaration = (MethodDeclaration) additional_method.getNode();
         methodDeclaration.accept(ecvCollector);
         Map<String, Integer> externalClassVariableCount= ecvCollector.getExternalClassVariableCount();
         String the_class_name = ((TypeDeclaration) the_class.getNode()).getName().toString();
-        new_sumMA = externalClassVariableCount.getOrDefault(the_class_name, 0);
+        new_sumMA += externalClassVariableCount.getOrDefault(the_class_name, 0);
 
-        new_sumMA += sumMA;
 
         double lcom3 = (new_m - (new_sumMA / new_a)) / (new_m - 1);
         return Double.isNaN(lcom3) ? 0 : lcom3;
