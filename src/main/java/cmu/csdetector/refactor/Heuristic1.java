@@ -16,26 +16,25 @@ public class Heuristic1 {
         this.method = method;
     }
 
-    public List<List<Integer>> getBestCluster() {
-        this.generateExtractOpportunity(this.method);
-        List<List<Integer>> bestCluster = null;
-
-        // TODO ranking by using statementNodes, clusters
-
-        return bestCluster;
-    }
-
-    private void generateExtractOpportunity(Method method) {
-        ASTNode node = method.getNode();
+    public List<Integer> generateExtractOpportunity() {
+        ASTNode node = this.method.getNode();
         StatementCollector statementCollector = new StatementCollector();
         node.accept(statementCollector);
         this.statementNodes = statementCollector.getNodesCollected();
         TreeMap<Integer, Set<String>> matrix = statementCollector.getMatrix();
-        HashMap<String, List<Integer>> transformedMatrix = transformMatrix(matrix);
+        HashMap<String, List<Integer>> transformedMatrix = this.transformMatrix(matrix);
+
+        // Generate clusters
         this.clusters = this.generateClusters(transformedMatrix, matrix.size());
+
+        // TODO ranking by using statementNodes, clusters
+
+        List<Integer> bestCluster = null;
+
+        return bestCluster;
     }
 
-    private void testClustering() {
+    public void testClustering() {
         Map<String, List<Integer>> matrix = new HashMap<>();
         matrix.put("manifests", List.of(2,25,29,30,33));
         matrix.put("rcs", List.of(2,3,5,6,7,8,12,13,14,16,18));
@@ -70,7 +69,7 @@ public class Heuristic1 {
     private TreeMap<Integer, List<List<Integer>>> generateClusters(Map<String, List<Integer>> matrix, int loc) {
         TreeMap<Integer, List<List<Integer>>> clustersByStep = new TreeMap<>();
         for (int step = 1; step <= loc; step++) {
-            System.out.println("\nStep: " + step);
+            System.out.print("\nStep " + step + ": ");
             List<List<Integer>> stepClusters = new ArrayList<>();
             for (String node : matrix.keySet()) {
                 List<Integer> sortedLines = matrix.get(node);
@@ -87,6 +86,7 @@ public class Heuristic1 {
 
     private List<List<Integer>> mergeAndSortClusters(List<List<Integer>> baseClusters) {
         if (baseClusters.isEmpty()) return baseClusters;
+
         baseClusters.sort(Comparator.comparingInt((List<Integer> a) -> a.get(0)));
         List<List<Integer>> mergedClusters = new ArrayList<>();
 

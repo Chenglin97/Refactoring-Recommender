@@ -69,9 +69,9 @@ public class CodeSmellDetector {
     private void complexClassAlgorithm(List<Type> complexClasses) {
         for (Type type: complexClasses) {
             for (Method method: type.getMethods()) {
-                Heuristic1 heuristic1 = new Heuristic1(method);
-                heuristic1.getBestCluster();
                 // TODO run heuristics
+                Heuristic1 heuristic1 = new Heuristic1(method);
+                heuristic1.generateExtractOpportunity();
             }
         }
     }
