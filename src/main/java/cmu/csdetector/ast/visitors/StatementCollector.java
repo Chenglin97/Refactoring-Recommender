@@ -59,6 +59,16 @@ public class StatementCollector extends CollectorVisitor<ASTNode> {
 		return true;
 	}
 
+	public boolean visit(BreakStatement node) {
+		this.createNewStatement(node);
+		return true;
+	}
+
+	public boolean visit(ContinueStatement node) {
+		this.createNewStatement(node);
+		return true;
+	}
+
 	public boolean visit(EnhancedForStatement node) {
 		this.createNewStatement(node);
 		return true;
@@ -174,10 +184,13 @@ public class StatementCollector extends CollectorVisitor<ASTNode> {
 		return true;
 	}
 
+
+
 	public void endVisit(IfStatement node) {
 		if(this.ifStatementStack.size() > 0) {
 			this.ifStatementStack.pop();
 		}
 	}
+
 
 }

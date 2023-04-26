@@ -53,6 +53,7 @@ public class Heuristic1 {
         }
         this.clusters.removeAll(invalidClusters);
     }
+
     private boolean isSyntacticallyValid(List<Integer> cluster) {
         ASTNode start = this.statementNodes.get(cluster.get(0)-1);
         if (ASTNode.nodeClassForType(start.getParent().getNodeType()) == IfStatement.class) start = start.getParent();
@@ -72,6 +73,7 @@ public class Heuristic1 {
         }
         return false;
     }
+
     private List<ASTNode> getAncestors(ASTNode node) {
         List<ASTNode> ancestors = new ArrayList<>();
         while (node.getParent() != null) {

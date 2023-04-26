@@ -5,7 +5,9 @@ import cmu.csdetector.console.ToolParameters;
 import cmu.csdetector.console.output.ObservableExclusionStrategy;
 import cmu.csdetector.metrics.MethodMetricValueCollector;
 import cmu.csdetector.metrics.TypeMetricValueCollector;
+import cmu.csdetector.metrics.calculators.type.LCOM2Calculator;
 import cmu.csdetector.refactor.Heuristic1;
+import cmu.csdetector.resources.ParenthoodRegistry;
 import cmu.csdetector.smells.ClassLevelSmellDetector;
 import cmu.csdetector.smells.MethodLevelSmellDetector;
 import cmu.csdetector.smells.Smell;
@@ -19,7 +21,15 @@ import cmu.csdetector.resources.loader.JavaFilesFinder;
 import cmu.csdetector.resources.loader.SourceFile;
 import cmu.csdetector.resources.loader.SourceFilesLoader;
 import org.apache.commons.cli.ParseException;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.ITypeRoot;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.rewrite.*;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+import org.eclipse.text.edits.TextEdit;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -68,6 +78,9 @@ public class CodeSmellDetector {
 
     private void complexClassAlgorithm(List<Type> complexClasses) {
         for (Type type: complexClasses) {
+            LCOM2Calculator lcom2Calculator = new LCOM2Calculator();
+            Double oldLcom2 = lcom2Calculator.getValue(type.getNode());
+
             for (Method method: type.getMethods()) {
                 // TODO run heuristics
                 Heuristic1 heuristic1 = new Heuristic1(method);
@@ -76,23 +89,101 @@ public class CodeSmellDetector {
         }
     }
 
+    private void move(List<ASTNode> statementNodes){
+        // complationUnit is in sourceFile
+        ASTNode nodeToMove = statementNodes.get(20).getParent();
+
+        CompilationUnit root = (CompilationUnit) nodeToMove.getRoot();
+
+        AST ast = root.getAST();
+        ASTRewrite rewriter = ASTRewrite.create(ast);
+
+        ASTNode oldParentNode = nodeToMove.getParent();
+        ListRewrite oldListRewrite = rewriter.getListRewrite(oldParentNode, Block.STATEMENTS_PROPERTY);
+
+        oldListRewrite.remove(nodeToMove, null);
+
+        // Obtain the modified source code
+        Document document = new Document(root.toString());
+        TextEdit edit = rewriter.rewriteAST(document, null);
+        try {
+            edit.apply(document);
+        } catch (BadLocationException e) {
+            e.printStackTrace();
+        }
+        String modifiedSourceCode = document.get();
+
+
+
+        // Step 7: add the node to the new parent list at the desired index
+//        newListRewrite.insertAt(nodeToMove, 0, null);
+
+
+        // Step 8: obtain the modified AST root node
+//        CompilationUnit modifiedAST = (CompilationUnit) rewriter.rewriteAST();
+//
+//        List<Statement> statements = (List<Statement>) listRewrite.getRewrittenList();
+//
+//        int indexToDelete = statements.indexOf(nodeToDelete);
+//        listRewrite.remove(nodeToDelete, null);
+//
+//        ASTNode modifiedNode = listRewrite.createCopyTarget(parentNode);
+//
+//        // Print the modified AST
+//        System.out.println(root);
+
+
+//
+//
+//        ASTNode root = node.getRoot();
+//        CompilationUnit compilationUnit = (CompilationUnit) root;
+//        TypeDeclaration typeDeclaration = (TypeDeclaration) compilationUnit.types().get(0);
+//
+//        MethodDeclaration[] methodDeclarations = typeDeclaration.getMethods();
+//        MethodDeclaration newMethodDeclaration = root.getAST().newMethodDeclaration();
+//
+//        // Set the name of the method
+//        String suggestedName = "suggectedMethodName";
+//        newMethodDeclaration.setName(root.getAST().newSimpleName(suggestedName));
+//
+//        // Set the return type of the method
+//        newMethodDeclaration.setReturnType2(root.getAST().newPrimitiveType(PrimitiveType.VOID));
+//
+//        // Add the method to the TypeDeclaration node
+//        typeDeclaration.bodyDeclarations().add(newMethodDeclaration);
+
+
+
+
+
+//
+//        MethodDeclaration methodDecl = methodDeclarations[0];
+//
+//        AST targetAST = AST.newAST(AST.JLS11);
+//
+//        // Copy the method declaration subtree to the target AST
+//        MethodDeclaration copiedMethodDecl = (MethodDeclaration) ASTNode.copySubtree(targetAST, methodDecl);
+//
+//        // Add the copied method declaration node to the target AST
+//        TypeDeclaration targetClassDecl = n.getAST().newTypeDeclaration();
+//        targetClassDecl.setName(targetAST.newSimpleName("MyTargetClass"));
+//        targetClassDecl.modifiers().add(targetAST.newModifier(Modifier.ModifierKeyword.PUBLIC_KEYWORD));
+//        targetClassDecl.bodyDeclarations().add(copiedMethodDecl);
+//
+//        System.out.println(targetClassDecl);
+////
+//
+//        AST ast = n.getAST();
+
+
+    }
+
+
+
     private void featureEnvyAlgorithm(List<Method> featureEnvies) {
         for (Method method: featureEnvies) {
             // TODO run heuristics
         }
-    }
-
-    private void printClusters(TreeMap<Integer, List<List<Integer>>> clustersByStep) {
-        System.out.println("");
-        for (Integer key: clustersByStep.keySet()) {
-            System.out.println("Step: " + key + ", clusters: "+ clustersByStep.get(key));
-        }
-    }
-
-    private void print(Object object) {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        String jsonStr = gson.toJson(object);
-        System.out.println(jsonStr);
     }
 
     private void refactor(List<Type> allTypes) {
@@ -187,5 +278,6 @@ public class CodeSmellDetector {
         gson.toJson(smellyTypes, writer);
         writer.close();
     }
+
 
 }
