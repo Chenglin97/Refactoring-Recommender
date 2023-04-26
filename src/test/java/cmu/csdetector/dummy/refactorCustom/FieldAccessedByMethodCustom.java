@@ -1,6 +1,5 @@
-package cmu.csdetector.dummy.refactor;
+package cmu.csdetector.dummy.refactorCustom;
 
-import cmu.csdetector.dummy.smells.SuperDummy;
 import org.apache.commons.io.FileUtils;
 
 public class FieldAccessedByMethodCustom extends SuperDummyCustom {

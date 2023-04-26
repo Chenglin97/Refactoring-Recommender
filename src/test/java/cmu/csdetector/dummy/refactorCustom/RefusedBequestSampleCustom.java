@@ -1,6 +1,4 @@
-package cmu.csdetector.dummy.refactor;
-
-import cmu.csdetector.dummy.smells.SuperDummy;
+package cmu.csdetector.dummy.refactorCustom;
 
 public class RefusedBequestSampleCustom extends SuperDummyCustom {
 	protected String refusedBequestSampleCustomAttribute = "RefusedBequestSampleCustomAttribute";
