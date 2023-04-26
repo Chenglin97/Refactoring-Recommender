@@ -1,5 +1,6 @@
 package cmu.csdetector.refactor;
 
+import cmu.csdetector.ast.visitors.ClassMethodInvocationVisitor;
 import cmu.csdetector.metrics.MetricName;
 import cmu.csdetector.metrics.TypeMetricValueCollector;
 import cmu.csdetector.resources.Method;
@@ -8,16 +9,12 @@ import cmu.csdetector.resources.Type;
 
 import cmu.csdetector.smells.Smell;
 import cmu.csdetector.smells.detectors.FeatureEnvy;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.PrimitiveType;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MethodMover {
     public Resource moveMethodBasedOnLCOM3(Method method, Resource source_class, ArrayList<Resource> classes) {
@@ -85,16 +82,72 @@ public class MethodMover {
     public Resource moveMethodBasedOnFeatureEnvy(Method method, Resource source_class, ArrayList<Resource> classes) {
         Resource target_class = source_class;
 
-        FeatureEnvy featureEnvyDetector = new FeatureEnvy();
+        ITypeBinding target_class_binding = this.determineFeatureEnvy(method);
 
-        String testClassName = "FeatureEnvyMethod";
-        String testMethodName = "superForeign";
-        List<Smell> smells = featureEnvyDetector.detect(method);
-
-        // print smells
-        System.out.println("smells: " + smells);
-        return target_class;
+        return source_class;
     }
 
+    public ITypeBinding determineFeatureEnvy(Method method) {
+
+        // Get the class that the method is defined in and pass to constructor of visitor.
+        ITypeBinding declaringType = method.getBinding().getDeclaringClass();
+        ClassMethodInvocationVisitor cmiVisitor = new ClassMethodInvocationVisitor(declaringType);
+
+        // Visit.
+        MethodDeclaration methodDeclaration = (MethodDeclaration) method.getNode();
+        methodDeclaration.accept(cmiVisitor);
+
+        Map<ITypeBinding, Integer> types = cmiVisitor.getMethodsCalls();
+
+        // Get the number of internal method calls within the targeted method
+        Integer internalCalls = (types.get(declaringType) != null) ? types.get(declaringType) : 0;
+        types.remove(declaringType);
+
+        // Create a new Feature Envy smell for each external class in which the method invocations to that class outnumber the number of internal method calls.
+        List<Smell> smells = new ArrayList<>();
+        Map<ITypeBinding, Integer> externalCalls = new HashMap<>();
+        Map<ITypeBinding, Integer> externalCallsWithoutParents = new HashMap<>();
+        for (ITypeBinding type : types.keySet()) {
+            if (types.get(type) > internalCalls) {
+                externalCalls.put(type, types.get(type));
+                externalCallsWithoutParents.put(type, types.get(type));
+            }
+        }
+
+        // account for super classes
+        for (ITypeBinding call : externalCalls.keySet()) {
+            // determine if the class has a parent in the map, then add the parent's calls to the child if it does
+            ITypeBinding parent = call.getSuperclass();
+            while (parent != null && externalCalls.containsKey(parent)) {
+                externalCallsWithoutParents.replace(call, externalCalls.get(parent) + externalCalls.get(call));
+                parent = parent.getSuperclass();
+            }
+        }
+
+        // remove any parent from external calls
+        for (ITypeBinding call : externalCalls.keySet()) {
+            if (externalCallsWithoutParents.containsKey(call.getSuperclass())) {
+                externalCallsWithoutParents.remove(call.getSuperclass());
+            }
+        }
+
+        // print out the external calls
+        System.out.println("EXTERNAL CALLS ");
+        for (ITypeBinding call : externalCallsWithoutParents.keySet()) {
+            // print call
+            System.out.println(call.getName() + " " + externalCallsWithoutParents.get(call));
+        }
+
+        // return the class with the most external calls
+        ITypeBinding max = null;
+        for (ITypeBinding call : externalCallsWithoutParents.keySet()) {
+            if (max == null || externalCallsWithoutParents.get(call) > externalCallsWithoutParents.get(max)) {
+                max = call;
+            }
+        }
+
+        return max;
+
+    }
 
 }
