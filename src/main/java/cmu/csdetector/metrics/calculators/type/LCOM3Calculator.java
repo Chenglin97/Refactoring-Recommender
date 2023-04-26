@@ -1,6 +1,7 @@
 package cmu.csdetector.metrics.calculators.type;
 
 import cmu.csdetector.ast.visitors.ClassFieldAccessCollector;
+import cmu.csdetector.ast.visitors.ExternalClassVariableCollector;
 import cmu.csdetector.ast.visitors.MethodCollector;
 import cmu.csdetector.metrics.MetricName;
 import cmu.csdetector.resources.Method;
@@ -10,6 +11,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import java.util.List;
+import java.util.Map;
 
 public class LCOM3Calculator extends LCOMCalculator {
 
@@ -68,11 +70,19 @@ public class LCOM3Calculator extends LCOMCalculator {
         double new_a = this.a;
         double new_sumMA = 0;
 
-        for (MethodDeclaration method : methods) {
-            cfaCollector.clearLocalReferences();
-            method.accept(cfaCollector);
-            new_sumMA += cfaCollector.getNodesCollected().size();
-        }
+        ExternalClassVariableCollector ecvCollector = new ExternalClassVariableCollector();
+        MethodDeclaration methodDeclaration = (MethodDeclaration) additional_method.getNode();
+        methodDeclaration.accept(ecvCollector);
+        Map<String, Integer> externalClassVariableCount= ecvCollector.getExternalClassVariableCount();
+        String the_class_name = ((TypeDeclaration) the_class.getNode()).getName().toString();
+        new_sumMA = externalClassVariableCount.getOrDefault(the_class_name, 0);
+
+        new_sumMA += sumMA;
+//        for (MethodDeclaration method : methods) {
+//            cfaCollector.clearLocalReferences();
+//            method.accept(cfaCollector);
+//            new_sumMA += cfaCollector.getLocalReferences().size();
+//        }
 
         double lcom3 = (new_m - (new_sumMA / new_a)) / (new_m - 1);
         return Double.isNaN(lcom3) ? 0 : lcom3;

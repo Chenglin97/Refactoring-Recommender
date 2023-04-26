@@ -23,7 +23,11 @@ public class ClassFieldAccessCollector extends CollectorVisitor<IVariableBinding
 	private Set<IVariableBinding> allVariables;
 
 	private List<IVariableBinding> localReferences = new ArrayList<>();
-	
+
+	public List<IVariableBinding> getLocalReferences() {
+		return localReferences;
+	}
+
 	public ClassFieldAccessCollector(TypeDeclaration declaringType) {
 		this.declaringTypeBinding = declaringType.resolveBinding();
 		this.allVariables = this.getVariablesInHierarchy();
