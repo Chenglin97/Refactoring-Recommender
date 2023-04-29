@@ -1,21 +1,30 @@
 package cmu.csdetector.refactor;
 
+import cmu.csdetector.ast.ASTBuilder;
+import cmu.csdetector.ast.visitors.CyclomaticComplexityVisitor;
 import cmu.csdetector.ast.visitors.StatementCollector;
+import cmu.csdetector.metrics.calculators.type.LCOM2Calculator;
+import cmu.csdetector.metrics.calculators.type.LCOM3Calculator;
 import cmu.csdetector.resources.Method;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.IfStatement;
-
+import org.eclipse.jdt.core.dom.*;
 import java.util.*;
 
 public class Heuristic1 {
 
     private final Method method;
+    private final String[] sourcePaths;
     private List<ASTNode> statementNodes;
     private Set<List<Integer>> clusters = new HashSet<>();
 
-    public Heuristic1(Method method) {
+    public Heuristic1(Method method, List<String> sourcePaths) {
         this.method = method;
+
+        String[] paths = new String[sourcePaths.size()];
+        for (int i = 0; i < paths.length; i++) {
+            paths[i] = sourcePaths.get(i);
+        }
+
+        this.sourcePaths = paths;
     }
 
     public List<Integer> generateExtractOpportunity() {
@@ -39,12 +48,146 @@ public class Heuristic1 {
         this.removeInvalidClusters();
         System.out.println("\nValid Clusters: " + this.clusters);
 
-        // TODO ranking by using statementNodes, clusters
+        return getBestCluster();
+    }
 
+    private List<Integer> getBestCluster() {
+
+        // temp ranking
+        LCOM2Calculator lcom2Calculator = new LCOM2Calculator();
+        CompilationUnit c = (CompilationUnit) this.statementNodes.get(0).getRoot();
+        Double oldLcom2 = lcom2Calculator.getValue((TypeDeclaration) c.types().get(0));
+        System.out.println("Old LCOM2: " + oldLcom2);
+
+        CyclomaticComplexityVisitor cyclomaticComplexityVisitor = new CyclomaticComplexityVisitor();
+        method.getNode().accept(cyclomaticComplexityVisitor);
+
+        double bestBenefit = 0;
         List<Integer> bestCluster = null;
+        Set<List<Integer>> clusters = this.clusters;
+
+        // TODO use ranking system to rank the clusters
+        for (List<Integer> cluster : clusters) {
+
+            String newSourceCode = this.getNewSourceCode(cluster);
+//            System.out.println(newSourceCode);
+
+            ASTBuilder builder = new ASTBuilder(this.sourcePaths);
+            ASTParser parser = builder.create();
+
+            // temp ranking
+            parser.setSource(newSourceCode.toCharArray());
+            CompilationUnit compilationUnit = (CompilationUnit) parser.createAST(null);
+
+            Double newLcom2 = lcom2Calculator.getValue((TypeDeclaration) compilationUnit.types().get(0));
+
+            double benefit = oldLcom2 - Math.max(oldLcom2, newLcom2);
+            System.out.println("New LCOM2: " + newLcom2 + ", benefit: " + benefit);
+
+            if (benefit > bestBenefit) {
+                bestBenefit = benefit;
+                bestCluster = cluster;
+            }
+        }
 
         return bestCluster;
     }
+
+    private String getNewSourceCode(List<Integer> cluster){
+
+        // Create ASTRewrite
+        CompilationUnit compilationUnit = this.method.getSourceFile().getCompilationUnit();
+        AST ast = compilationUnit.getAST();
+
+        // Get nodes to move
+        List<ASTNode> nodes = this.statementToMove(this.statementNodes, cluster);
+
+        if (nodes.size() == 0) {
+            return compilationUnit.toString();
+        }
+
+        // New a method
+        MethodDeclaration methodDeclaration = ast.newMethodDeclaration();
+        methodDeclaration.setName(ast.newSimpleName("iLoveRefactoringSoMuchFunMethod"));
+        Block body = ast.newBlock();
+        methodDeclaration.setBody(body);
+
+        List<Block> deteteNodesParent = new ArrayList<>();
+
+        for (ASTNode node : nodes) {
+
+            // Sometimes it's a block, which is ifstatement
+            if (node instanceof Block) {
+                node = node.getParent();
+            }
+
+            // Remove child from parent
+            Block block = (Block) node.getParent();
+            block.statements().remove(node);
+            deteteNodesParent.add(block);
+
+            // Add statement into new method
+            body.statements().add(node);
+        }
+
+        TypeDeclaration type = (TypeDeclaration) compilationUnit.types().get(0);
+        type.bodyDeclarations().add(methodDeclaration);
+
+        String returnString = compilationUnit.toString();
+
+        type.bodyDeclarations().remove(methodDeclaration);
+
+        for (int i = 0; i < deteteNodesParent.size(); i++) {
+
+            ASTNode node = nodes.get(i);
+            if (node instanceof SwitchStatement) {
+                continue;
+            }
+
+            // Sometimes it's a block, which is ifstatement
+            if (node instanceof Block) {
+                node = node.getParent();
+            }
+
+            // Remove child from parent
+            Block block = (Block) node.getParent();
+            block.statements().remove(node);
+
+            deteteNodesParent.get(i).statements().add(node);
+
+        }
+        String recoverString = compilationUnit.toString();
+
+        return returnString;
+    }
+
+    private List<ASTNode> statementToMove(List<ASTNode> statementNodes, List<Integer> cluster) {
+        int start = cluster.get(0)-1;
+        int end = cluster.get(1)-1;
+        ASTNode node = statementNodes.get(start);
+        if (node instanceof Block) {
+            node = node.getParent();
+        }
+
+        if (!(node.getParent() instanceof Block)) {
+            return new ArrayList<>();
+        }
+
+        List<ASTNode> moveList = new ArrayList<>();
+        ASTNode parent = node.getParent();
+        for (int i = start; i <= end; i++) {
+            ASTNode candidate = statementNodes.get(i);
+            if (candidate instanceof Block) {
+                candidate = candidate.getParent();
+            }
+            if (candidate.getParent().equals(parent)) {
+                moveList.add(candidate);
+            }
+        }
+
+        return moveList;
+    }
+
 
     private void removeInvalidClusters() {
         Set<List<Integer>> invalidClusters = new HashSet<>();
@@ -118,7 +261,7 @@ public class Heuristic1 {
     private void generateClusters(Map<String, List<Integer>> matrix, int loc) {
 //        TreeMap<Integer, List<List<Integer>>> clustersByStep = new TreeMap<>();
         for (int step = 1; step <= loc; step++) {
-            System.out.print("\nStep " + step + ": ");
+//            System.out.print("\nStep " + step + ": ");
             List<List<Integer>> stepClusters = new ArrayList<>();
             for (String node : matrix.keySet()) {
                 List<Integer> sortedLines = matrix.get(node);
@@ -130,7 +273,7 @@ public class Heuristic1 {
             this.clusters.addAll(stepClusters);
 //            clustersByStep.put(step, stepClusters);
 
-            System.out.println(stepClusters);
+//            System.out.println(stepClusters);
         }
     }
 
@@ -232,5 +375,77 @@ public class Heuristic1 {
     public List<ASTNode> getStatementNodes() {
         return statementNodes;
     }
-
 }
+
+
+//    back up code
+//    private String move(List<ASTNode> statementNodes, Type type){
+//
+//        ASTNode nodeToMove = statementNodes.get(9);
+//        if (nodeToMove instanceof Block) {
+//            nodeToMove = nodeToMove.getParent();
+//        }
+//
+//        CompilationUnit cu = (CompilationUnit) nodeToMove.getRoot();
+//
+//        // Create ASTRewrite
+//        AST ast = cu.getAST();
+//        ASTRewrite rewriter = ASTRewrite.create(ast);
+//
+//        MethodDeclaration newMethod = ast.newMethodDeclaration();
+//        newMethod.setName(ast.newSimpleName("newMethod"));
+//
+//        // create new variable declaration statements
+//        VariableDeclarationFragment var1 = ast.newVariableDeclarationFragment();
+//        var1.setName(ast.newSimpleName("var1"));
+//        var1.setInitializer(ast.newNumberLiteral("1"));
+//        VariableDeclarationStatement varStmt1 = ast.newVariableDeclarationStatement(var1);
+//
+////        // add variable declarations to method body
+//        Block body = ast.newBlock();
+//        newMethod.setBody(body);
+//
+////        newMethod.getBody();
+//
+//        newMethod.getBody().statements().add(nodeToMove);
+//        newMethod.getBody().statements().add(statementNodes.get(0));
+//        newMethod.getBody().statements().add(statementNodes.get(18).getParent());
+//
+//        ListRewrite listRewrite = rewriter.getListRewrite(cu, CompilationUnit.TYPES_PROPERTY);
+//        listRewrite.insertLast(newMethod, null);
+//
+//        Path path = Paths.get(type.getSourceFile().getFile().getAbsolutePath());
+//        String sourceCode = null;
+//        try {
+//            sourceCode = Files.readString(path);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//        // Apply the rewrite to the document
+//        Document document = new Document(sourceCode);
+//        TextEdit edits = rewriter.rewriteAST(document, null);
+//        try {
+//            edits.apply(document);
+//        } catch (BadLocationException e) {
+//            e.printStackTrace();
+//        }
+//
+//        ASTParser parser = ASTParser.newParser(AST.JLS11);
+//        parser.setKind(ASTParser.K_COMPILATION_UNIT);
+//        parser.setSource(sourceCode.toCharArray());
+//        parser.setResolveBindings(true);
+//
+//        // Create a new AST from the modified document
+//        parser.setSource(document.get().toCharArray());
+//        CompilationUnit newCu = (CompilationUnit) parser.createAST(null);
+//
+//        // Print the new AST
+//        System.out.println(newCu.toString());
+//
+//        sourceCode = document.get();
+//
+//        return sourceCode;
+//    }
+
+

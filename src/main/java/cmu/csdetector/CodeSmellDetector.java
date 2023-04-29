@@ -1,6 +1,9 @@
 package cmu.csdetector;
 
+import cmu.csdetector.ast.ASTBuilder;
+import cmu.csdetector.ast.visitors.CyclomaticComplexityVisitor;
 import cmu.csdetector.ast.visitors.StatementCollector;
+import cmu.csdetector.console.ConsoleProgressMonitor;
 import cmu.csdetector.console.ToolParameters;
 import cmu.csdetector.console.output.ObservableExclusionStrategy;
 import cmu.csdetector.metrics.MethodMetricValueCollector;
@@ -8,6 +11,7 @@ import cmu.csdetector.metrics.TypeMetricValueCollector;
 import cmu.csdetector.metrics.calculators.type.LCOM2Calculator;
 import cmu.csdetector.refactor.Heuristic1;
 import cmu.csdetector.resources.ParenthoodRegistry;
+import cmu.csdetector.resources.loader.SourceFileASTRequestor;
 import cmu.csdetector.smells.ClassLevelSmellDetector;
 import cmu.csdetector.smells.MethodLevelSmellDetector;
 import cmu.csdetector.smells.Smell;
@@ -21,9 +25,7 @@ import cmu.csdetector.resources.loader.JavaFilesFinder;
 import cmu.csdetector.resources.loader.SourceFile;
 import cmu.csdetector.resources.loader.SourceFilesLoader;
 import org.apache.commons.cli.ParseException;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.ITypeRoot;
-import org.eclipse.jdt.core.JavaModelException;
+import org.apache.commons.io.FileUtils;
 import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.rewrite.*;
@@ -35,9 +37,14 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class CodeSmellDetector {
+
+    private SourceFilesLoader compUnitLoader;
 
     public static void main(String[] args) throws IOException{
         CodeSmellDetector instance = new CodeSmellDetector();
@@ -66,9 +73,9 @@ public class CodeSmellDetector {
 
         detectSmells(allTypes);
 
-        saveSmellsFile(allTypes);
+//        saveSmellsFile(allTypes);
 
-        refactor(allTypes);
+        refactor(allTypes, sourcePaths);
 
 //        testClustering();
 
@@ -76,17 +83,16 @@ public class CodeSmellDetector {
 
     }
 
-    private void complexClassAlgorithm(List<Type> complexClasses) {
+    private void complexClassAlgorithm(List<Type> complexClasses, List<String> sourcePaths){
         for (Type type: complexClasses) {
-            LCOM2Calculator lcom2Calculator = new LCOM2Calculator();
-            Double oldLcom2 = lcom2Calculator.getValue(type.getNode());
-
             for (Method method: type.getMethods()) {
-                // TODO run heuristics
-                Heuristic1 heuristic1 = new Heuristic1(method);
-                heuristic1.generateExtractOpportunity();
+                    // TODO run heuristics
+                Heuristic1 heuristic1 = new Heuristic1(method, sourcePaths);
+                List<Integer> bestCluster = heuristic1.generateExtractOpportunity();
+
             }
         }
+
     }
 
     private void featureEnvyAlgorithm(List<Method> featureEnvies) {
@@ -95,7 +101,7 @@ public class CodeSmellDetector {
         }
     }
 
-    private void refactor(List<Type> allTypes) {
+    private void refactor(List<Type> allTypes, List<String> sourcePaths) {
         // get complexClass
         List<Type> complexClasses = new ArrayList<>();
         ComplexClass complexClass = new ComplexClass();
@@ -106,7 +112,7 @@ public class CodeSmellDetector {
             }
         }
         System.out.println("Analyze complex class, " + complexClasses.size() + " classes are complex class.");
-        this.complexClassAlgorithm(complexClasses);
+        this.complexClassAlgorithm(complexClasses, sourcePaths);
 
         // get featureEnvy
         List<Method> featureEnvies = new ArrayList<>();
@@ -146,8 +152,8 @@ public class CodeSmellDetector {
         List<Type> allTypes = new ArrayList<>();
 
         JavaFilesFinder sourceLoader = new JavaFilesFinder(sourcePaths);
-        SourceFilesLoader compUnitLoader = new SourceFilesLoader(sourceLoader);
-        List<SourceFile> sourceFiles = compUnitLoader.getLoadedSourceFiles();
+        this.compUnitLoader = new SourceFilesLoader(sourceLoader);
+        List<SourceFile> sourceFiles = this.compUnitLoader.getLoadedSourceFiles();
 
         for (SourceFile sourceFile : sourceFiles) {
             allTypes.addAll(sourceFile.getTypes());

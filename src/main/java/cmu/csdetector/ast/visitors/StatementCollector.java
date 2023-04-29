@@ -32,6 +32,9 @@ public class StatementCollector extends CollectorVisitor<ASTNode> {
 			return;
 		}
 		if (isIf) {
+			if (this.ifStatementStack.size() == 0) {
+				System.out.println(name);
+			}
 			this.ifStatementStack.peek().add(name);
 		} else {
 			int lastKey = this.matrix.lastKey();
@@ -184,13 +187,15 @@ public class StatementCollector extends CollectorVisitor<ASTNode> {
 		return true;
 	}
 
-
+	public boolean visit(SwitchCase node) {
+		this.createNewStatement(node);
+		return true;
+	}
 
 	public void endVisit(IfStatement node) {
 		if(this.ifStatementStack.size() > 0) {
 			this.ifStatementStack.pop();
 		}
 	}
-
 
 }
