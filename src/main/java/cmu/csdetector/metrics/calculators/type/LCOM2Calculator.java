@@ -8,7 +8,7 @@ public class LCOM2Calculator extends LCOMCalculator {
 
     @Override
     protected Double computeValue(ASTNode target) {
-        TypeDeclaration type = (TypeDeclaration)target;
+        TypeDeclaration type = (TypeDeclaration) target;
 
         this.calculateMetrics(type);
         double lcom2 = 1 - (this.sumMA / (this.m * this.a));

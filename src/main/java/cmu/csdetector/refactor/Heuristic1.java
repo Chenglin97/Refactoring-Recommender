@@ -85,7 +85,7 @@ public class Heuristic1 {
             double benefit = oldLcom2 - Math.max(oldLcom2, newLcom2);
             System.out.println("New LCOM2: " + newLcom2 + ", benefit: " + benefit);
 
-            if (benefit > bestBenefit) {
+            if (benefit >= bestBenefit) {
                 bestBenefit = benefit;
                 bestCluster = cluster;
             }
@@ -199,6 +199,7 @@ public class Heuristic1 {
         int start = cluster.get(0)-1;
         int end = cluster.get(1)-1;
         ASTNode node = statementNodes.get(start);
+
         if (node instanceof Block) {
             node = node.getParent();
         }
@@ -207,19 +208,23 @@ public class Heuristic1 {
             return new ArrayList<>();
         }
 
-        Set<ASTNode> moveList = new HashSet<>();
+        HashSet<ASTNode> moveList = new HashSet<>();
+        List<ASTNode> returnList = new ArrayList<>();
         ASTNode parent = node.getParent();
         for (int i = start; i <= end; i++) {
             ASTNode candidate = statementNodes.get(i);
             if (candidate instanceof Block) {
                 candidate = candidate.getParent();
             }
+            if (moveList.contains(candidate)) {
+                continue;
+            }
             if (candidate.getParent().equals(parent)) {
+                returnList.add(candidate);
                 moveList.add(candidate);
             }
         }
-
-        return new ArrayList<ASTNode>(moveList);
+        return returnList;
     }
 
 
