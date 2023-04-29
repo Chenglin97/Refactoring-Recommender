@@ -60,9 +60,6 @@ public class Heuristic1 {
         Double oldLcom2 = lcom2Calculator.getValue((TypeDeclaration) c.types().get(0));
         System.out.println("Old LCOM2: " + oldLcom2);
 
-        CyclomaticComplexityVisitor cyclomaticComplexityVisitor = new CyclomaticComplexityVisitor();
-        method.getNode().accept(cyclomaticComplexityVisitor);
-
         double bestBenefit = 0;
         List<Integer> bestCluster = null;
         Set<List<Integer>> clusters = this.clusters;
