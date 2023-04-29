@@ -56,6 +56,7 @@ public class Heuristic1 {
         // temp ranking
         LCOM2Calculator lcom2Calculator = new LCOM2Calculator();
         CompilationUnit c = (CompilationUnit) this.statementNodes.get(0).getRoot();
+
         Double oldLcom2 = lcom2Calculator.getValue((TypeDeclaration) c.types().get(0));
         System.out.println("Old LCOM2: " + oldLcom2);
 
@@ -95,8 +96,8 @@ public class Heuristic1 {
 
     private String getNewSourceCode(List<Integer> cluster){
 
-        // Create ASTRewrite
         CompilationUnit compilationUnit = this.method.getSourceFile().getCompilationUnit();
+
         AST ast = compilationUnit.getAST();
 
         // Get nodes to move
@@ -106,14 +107,48 @@ public class Heuristic1 {
             return compilationUnit.toString();
         }
 
+//        MethodInvocation methodInvocation = ast.newMethodInvocation();
+//
+//        // Set the name of the method to call
+//        SimpleName methodToCall = ast.newSimpleName("iLoveRefactoringSoMuchFunMethod");
+//        methodInvocation.setName(methodToCall);
+//
+//        // Create the arguments for the method call
+//        List<Expression> arguments = methodInvocation.arguments();
+//        Expression argument1 = ast.newSimpleName("arg1");
+//        Expression argument2 = ast.newSimpleName("arg2");
+//        arguments.add(argument1);
+//        arguments.add(argument2);
+//
+//        // Set the expression to call the method on
+//        Expression expression = ast.newSimpleName("object");
+//        methodInvocation.setExpression(expression);
+//
+//        // Add the method call to a statement
+//        ExpressionStatement expressionStatement = ast.newExpressionStatement(methodInvocation);
+//
+//        Block parentBlock = (Block) nodes.get(0).getParent();
+//        int index = parentBlock.statements().indexOf(nodes.get(0));
+//        parentBlock.statements().add(index, expressionStatement);
+
         // New a method
         MethodDeclaration methodDeclaration = ast.newMethodDeclaration();
         methodDeclaration.setName(ast.newSimpleName("iLoveRefactoringSoMuchFunMethod"));
         Block body = ast.newBlock();
         methodDeclaration.setBody(body);
 
-        List<Block> deteteNodesParent = new ArrayList<>();
+        List<Integer> deleteNodesIndex = new ArrayList<>();
+        for (ASTNode node : nodes) {
+            if (node instanceof Block) {
+                node = node.getParent();
+            }
 
+            Block block = (Block) node.getParent();
+            int index = block.statements().indexOf(node);
+            deleteNodesIndex.add(index);
+        }
+
+        List<Block> deteteNodesParent = new ArrayList<>();
         for (ASTNode node : nodes) {
 
             // Sometimes it's a block, which is ifstatement
@@ -123,8 +158,8 @@ public class Heuristic1 {
 
             // Remove child from parent
             Block block = (Block) node.getParent();
-            block.statements().remove(node);
             deteteNodesParent.add(block);
+            block.statements().remove(node);
 
             // Add statement into new method
             body.statements().add(node);
@@ -140,9 +175,6 @@ public class Heuristic1 {
         for (int i = 0; i < deteteNodesParent.size(); i++) {
 
             ASTNode node = nodes.get(i);
-            if (node instanceof SwitchStatement) {
-                continue;
-            }
 
             // Sometimes it's a block, which is ifstatement
             if (node instanceof Block) {
@@ -153,9 +185,11 @@ public class Heuristic1 {
             Block block = (Block) node.getParent();
             block.statements().remove(node);
 
-            deteteNodesParent.get(i).statements().add(node);
-
+            Block originalBlock = deteteNodesParent.get(i);
+            int index = deleteNodesIndex.get(i);
+            originalBlock.statements().add(index, node);
         }
+
         String recoverString = compilationUnit.toString();
 
         return returnString;
@@ -173,7 +207,7 @@ public class Heuristic1 {
             return new ArrayList<>();
         }
 
-        List<ASTNode> moveList = new ArrayList<>();
+        Set<ASTNode> moveList = new HashSet<>();
         ASTNode parent = node.getParent();
         for (int i = start; i <= end; i++) {
             ASTNode candidate = statementNodes.get(i);
@@ -185,7 +219,7 @@ public class Heuristic1 {
             }
         }
 
-        return moveList;
+        return new ArrayList<ASTNode>(moveList);
     }
 
 
