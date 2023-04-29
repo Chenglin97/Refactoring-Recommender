@@ -30,7 +30,7 @@ public class MethodMover {
         for (Resource target_class: classes) {
             Double old_target_lcom_3 = target_class.getMetricValue(MetricName.LCOM3);
 
-            Double new_source_lcom_3 = lcom3Calculator.calculateWithoutMethod(source_class, method_node);
+            Double new_source_lcom_3 = calculateLCOM3WithoutMethod(method_node, source_class);
             Double new_target_lcom_3 = lcom3Calculator.calculateWithAdditionalMethod(target_class, method_node);
 
             System.out.println("target class: " + target_class.getFullyQualifiedName());
@@ -44,6 +44,15 @@ public class MethodMover {
             }
         }
         return null;
+    }
+
+    public Double calculateLCOM3WithoutMethod(ASTNode method_node, Resource source_class) {
+        TypeMetricValueCollector collector = new TypeMetricValueCollector();
+
+         Resource classWithoutMethod = simulateRemoveMethodFromClass(method_node, source_class);
+         collector.collect(classWithoutMethod);
+         return classWithoutMethod.getMetricValue(MetricName.LCOM3);
+
     }
 
     public Resource moveMethodBasedOnLCOM3(Method method, Resource source_class, ArrayList<Resource> classes) {
@@ -106,5 +115,12 @@ public class MethodMover {
         sourceClassNode.bodyDeclarations().remove(method);
 
         return new ResourcePair(targetClassCopy, sourceClassCopy);
+    }
+
+    private Resource simulateRemoveMethodFromClass(ASTNode method, Resource source_class) {
+        Resource sourceClassCopy = source_class.clone();
+        TypeDeclaration sourceClassCopyDeclaration = (TypeDeclaration) sourceClassCopy.getNode();
+        sourceClassCopyDeclaration.bodyDeclarations().remove(method);
+        return sourceClassCopy;
     }
 }

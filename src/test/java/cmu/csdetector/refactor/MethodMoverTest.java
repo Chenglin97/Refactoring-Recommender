@@ -116,4 +116,17 @@ public class MethodMoverTest {
 
         Assertions.assertEquals(testTypes.get("FeatureEnvyMethodCustom"), target_class);
     }
+
+    @Test
+    void MoveMethodCustom4() {
+        String testClassName = "FeatureEnvyMethodCustom";
+        ArrayList<Resource> target_classes = new ArrayList<>();
+        target_classes.add((Resource) (testTypes.get("FieldAccessedByMethodCustom")));
+        target_classes.add((Resource) testTypes.get("RefusedBequestSampleCustom"));
+        String testMethodName = "mostLocal";
+        Method method = testMethods.get(testClassName).get(testMethodName);
+        Resource target_class = methodMover.moveMethodBasedOnLCOM3(method, testTypes.get(testClassName), target_classes);
+
+        Assertions.assertEquals(testTypes.get("FeatureEnvyMethodCustom"), target_class);
+    }
 }
