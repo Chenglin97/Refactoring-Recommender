@@ -17,9 +17,12 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MethodMover {
+    private Map<Resource, Double> sum_lcom3_values = new HashMap<>();
     public Resource moveMethod(ASTNode method_node, Resource source_class, ArrayList<Resource> classes) {
         // returns the class the method should be moved to
         // Resource source_class = method.getBelongingClass();
@@ -39,11 +42,23 @@ public class MethodMover {
             System.out.println("old target lcom3: " + old_target_lcom_3);
             System.out.println("new target lcom3: " + new_target_lcom_3);
 
-            if (new_target_lcom_3 + new_source_lcom_3 < old_source_lcom_3 + old_target_lcom_3) {
-                return target_class;
+            sum_lcom3_values.put(target_class, new_target_lcom_3 + new_source_lcom_3);
+        }
+        Resource target_class = getBestTargetClass();
+        return target_class;
+    }
+
+    private Resource getBestTargetClass() {
+        /* find the minimum lcom3 value */
+        Resource target_class = null;
+        Double min_lcom3_value = Double.MAX_VALUE;
+        for( Map.Entry<Resource, Double> entry : sum_lcom3_values.entrySet()) {
+            if (entry.getValue() < min_lcom3_value) {
+                min_lcom3_value = entry.getValue();
+                target_class = entry.getKey();
             }
         }
-        return null;
+        return target_class;
     }
 
     public Double calculateLCOM3WithoutMethod(ASTNode method_node, Resource source_class) {
