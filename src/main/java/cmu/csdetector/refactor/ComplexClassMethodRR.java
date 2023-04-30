@@ -6,9 +6,7 @@ import cmu.csdetector.smells.SmellName;
 
 public class ComplexClassMethodRR extends MethodRefactorReport {
 
-    public ComplexClassMethodRR(Method method, String methodName, Type sourceClass, int sourceMethodStartLine, int sourceMethodEndLine, SmellName smellType, Type targetClass) {
-        super(method, methodName, sourceClass, sourceMethodStartLine, sourceMethodEndLine, smellType);
+    public ComplexClassMethodRR(Method sourceMethod, Method extractedMethod, String newMethodName, Type sourceClass, int sourceMethodStartLine, int sourceMethodEndLine, SmellName smellType) {
+        super(sourceMethod, extractedMethod, newMethodName, sourceClass, sourceMethodStartLine, sourceMethodEndLine, smellType);
     }
-
-
 }

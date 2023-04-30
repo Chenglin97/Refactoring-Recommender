@@ -8,8 +8,16 @@ public class FeatureEnvyMethodRR extends MethodRefactorReport{
 
     public Type targetClass;
 
-    public FeatureEnvyMethodRR(Method method, String methodName, Type sourceClass, int sourceMethodStartLine, int sourceMethodEndLine, SmellName smellType, Type targetClass) {
-        super(method, methodName, sourceClass, sourceMethodStartLine, sourceMethodEndLine, smellType);
-        targetClass = targetClass;
+    public FeatureEnvyMethodRR(Method sourceMethod, Method extractedMethod, String newMethodName, Type sourceClass, int sourceMethodStartLine, int sourceMethodEndLine, SmellName smellType, Type targetClass) {
+        super(sourceMethod, extractedMethod, newMethodName, sourceClass, sourceMethodStartLine, sourceMethodEndLine, smellType);
+        this.targetClass = targetClass;
+    }
+
+    @Override
+    public String toString() {
+        String report = "Feature Envy: Move a portion of " + sourceMethod.getFullyQualifiedName() + " in " + sourceClass.getFullyQualifiedName() + " to " + targetClass.getFullyQualifiedName();
+        report += "\n Lines " + sourceMethodStartLine + " to " + sourceMethodEndLine + " to " + targetClass.getFullyQualifiedName();
+//        report += "\n Potential Method Name: " + newMethodName; /
+        return report;
     }
 }

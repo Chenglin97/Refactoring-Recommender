@@ -5,19 +5,21 @@ import cmu.csdetector.smells.SmellName;
 
 public class MethodRefactorReport {
 
-    public Method method;
-    public String methodName;
-    public Type SourceClass;
-    public int SourceMethodStartLine;
-    public int SourceMethodEndLine;
+    public Method sourceMethod;
+    public Method extractedMethod;
+    public String newMethodName;
+    public Type sourceClass;
+    public int sourceMethodStartLine;
+    public int sourceMethodEndLine;
     public SmellName smellType;
 
-    public MethodRefactorReport(Method method, String methodName, Type SourceClass, int SourceMethodStartLine, int SourceMethodEndLine, SmellName smellType) {
-        this.method = method;
-        this.methodName = methodName;
-        this.SourceClass = SourceClass;
-        this.SourceMethodStartLine = SourceMethodStartLine;
-        this.SourceMethodEndLine = SourceMethodEndLine;
+    public MethodRefactorReport(Method sourceMethod, Method extractedMethod, String newMethodName, Type sourceClass, int sourceMethodStartLine, int sourceMethodEndLine, SmellName smellType) {
+        this.sourceMethod = sourceMethod;
+        this.extractedMethod = extractedMethod;
+        this.newMethodName = newMethodName;
+        this.sourceClass = sourceClass;
+        this.sourceMethodStartLine = sourceMethodStartLine;
+        this.sourceMethodEndLine = sourceMethodEndLine;
         this.smellType = smellType;
     }
 
