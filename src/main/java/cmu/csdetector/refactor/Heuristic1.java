@@ -34,18 +34,6 @@ public class Heuristic1 {
         StatementCollector statementCollector = new StatementCollector();
         node.accept(statementCollector);
         this.statementNodes = statementCollector.getNodesCollected();
-
-        for (ASTNode n: this.statementNodes) {
-            ParameterCollector parameterCollector = new ParameterCollector();
-            n.accept(parameterCollector);
-            Set<String> parameters = parameterCollector.getParameters();
-            for (String s : parameters) {
-                System.out.print(s + ", ");
-            }
-            System.out.println("");
-        }
-
-
         TreeMap<Integer, Set<String>> matrix = statementCollector.getMatrix();
         HashMap<String, List<Integer>> transformedMatrix = this.transformMatrix(matrix);
 
