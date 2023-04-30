@@ -79,11 +79,13 @@ public class StatementCollector extends CollectorVisitor<ASTNode> {
 
 	// doesn't contain any variables or methods
 	public boolean visit(TryStatement node) {
+		this.createNewStatement(node);
 		return true;
 	}
 
 	// doesn't contain any variables or methods
 	public boolean visit(CatchClause node) {
+		this.createNewStatement(node);
 		return false;
 	}
 
