@@ -88,7 +88,7 @@ public class MethodMoverTest {
         Method method = testMethods.get(testClassName).get(testMethodName);
         Resource target_class = methodMover.moveMethod(method.getNode(), testTypes.get(testClassName), target_classes);
 
-        Assertions.assertEquals(testTypes.get("FieldAccessedByMethodCustom"), target_class);
+        Assertions.assertEquals(testTypes.get("RefusedBequestSampleCustom"), target_class);
     }
     @Test
 
@@ -101,20 +101,31 @@ public class MethodMoverTest {
         Method method = testMethods.get(testClassName).get(testMethodName);
         Resource target_class = methodMover.moveMethod(method.getNode(), testTypes.get(testClassName), target_classes);
 
-        Assertions.assertEquals(testTypes.get("FieldAccessedByMethodCustom"), target_class);
+        Assertions.assertEquals(testTypes.get("RefusedBequestSampleCustom"), target_class);
     }
 
     @Test
     void MoveMethodCustom3() {
+        /* This is an example that shows LCOM3 is not necessarily the best metric to use */
+        /* LCOM3 can be affected by the size of the class significantly */
+
         String testClassName = "FeatureEnvyMethodCustom";
         ArrayList<Resource> target_classes = new ArrayList<>();
         target_classes.add((Resource) (testTypes.get("FieldAccessedByMethodCustom")));
         target_classes.add((Resource) testTypes.get("RefusedBequestSampleCustom"));
+
         String testMethodName = "mostLocal";
         Method method = testMethods.get(testClassName).get(testMethodName);
         Resource target_class = methodMover.moveMethod(method.getNode(), testTypes.get(testClassName), target_classes);
+        /* The class "RefusedBequestSampleCustom" is so small,
+            so even though the method only called it once,
+            the Heuristic still wants to move the method to it.
+         */
 
-        Assertions.assertEquals(testTypes.get("FeatureEnvyMethodCustom"), target_class);
+        Assertions.assertEquals(testTypes.get("RefusedBequestSampleCustom"), target_class);
+        /* Fortunately, this would not happen if we know the method does not
+            contain any feature envy. And we won't run methodMover in this case.
+         */
     }
 
     @Test

@@ -30,6 +30,7 @@ public class MethodMover {
 
         LCOM3Calculator lcom3Calculator = new LCOM3Calculator();
         Double old_source_lcom_3 = source_class.getMetricValue(MetricName.LCOM3);
+
         for (Resource target_class: classes) {
             Double old_target_lcom_3 = target_class.getMetricValue(MetricName.LCOM3);
 
@@ -41,22 +42,29 @@ public class MethodMover {
             System.out.println("new source lcom3: " + new_source_lcom_3);
             System.out.println("old target lcom3: " + old_target_lcom_3);
             System.out.println("new target lcom3: " + new_target_lcom_3);
+            Double lcom_reduction = new_target_lcom_3 + new_source_lcom_3 - old_target_lcom_3 - old_source_lcom_3;
+            Double cohesion_improvement = -lcom_reduction;
+            System.out.println("cohesion improvement: " + cohesion_improvement);
 
-            sum_lcom3_values.put(target_class, new_target_lcom_3 + new_source_lcom_3);
+            sum_lcom3_values.put(target_class, cohesion_improvement);
         }
-        Resource target_class = getBestTargetClass();
+        Resource target_class = getBestTargetClass(source_class);
         return target_class;
     }
 
-    private Resource getBestTargetClass() {
-        /* find the minimum lcom3 value */
+    private Resource getBestTargetClass(Resource source_class) {
+        /* find the maximum cohesion improvement value */
+        Double max_improvement = Double.NEGATIVE_INFINITY;
         Resource target_class = null;
-        Double min_lcom3_value = Double.MAX_VALUE;
-        for( Map.Entry<Resource, Double> entry : sum_lcom3_values.entrySet()) {
-            if (entry.getValue() < min_lcom3_value) {
-                min_lcom3_value = entry.getValue();
-                target_class = entry.getKey();
+        for (Resource candidate_class: sum_lcom3_values.keySet()) {
+            Double improvement = sum_lcom3_values.get(candidate_class);
+            if (improvement > max_improvement) {
+                max_improvement = improvement;
+                target_class = candidate_class;
             }
+        }
+        if (max_improvement < 0) {
+            return source_class;
         }
         return target_class;
     }
