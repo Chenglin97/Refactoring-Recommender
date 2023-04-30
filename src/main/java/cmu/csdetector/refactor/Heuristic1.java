@@ -1,10 +1,8 @@
 package cmu.csdetector.refactor;
 
 import cmu.csdetector.ast.ASTBuilder;
-import cmu.csdetector.ast.visitors.CyclomaticComplexityVisitor;
 import cmu.csdetector.ast.visitors.StatementCollector;
 import cmu.csdetector.metrics.calculators.type.LCOM2Calculator;
-import cmu.csdetector.metrics.calculators.type.LCOM3Calculator;
 import cmu.csdetector.resources.Method;
 import org.eclipse.jdt.core.dom.*;
 import java.util.*;
@@ -16,6 +14,7 @@ public class Heuristic1 {
     private List<ASTNode> statementNodes;
     private Set<List<Integer>> clusters = new HashSet<>();
     private List<ExtractMethodOpportunity> opportunities = new ArrayList<>();
+    private TypeDeclaration classAfterAddingCluster;
 
     public Heuristic1(Method method, List<String> sourcePaths) {
         this.method = method;
@@ -87,17 +86,10 @@ public class Heuristic1 {
         // TODO use ranking system to rank the clusters
         for (List<Integer> cluster : clusters) {
 
-            String newSourceCode = this.getNewSourceCode(cluster);
-//            System.out.println(newSourceCode);
+            TypeDeclaration classAfterAddingCluster = this.createNewClassAfterAddingCluster(cluster);
+            this.classAfterAddingCluster = classAfterAddingCluster;
 
-            ASTBuilder builder = new ASTBuilder(this.sourcePaths);
-            ASTParser parser = builder.create();
-
-            // temp ranking
-            parser.setSource(newSourceCode.toCharArray());
-            CompilationUnit compilationUnit = (CompilationUnit) parser.createAST(null);
-
-            Double newLcom2 = lcom2Calculator.getValue((TypeDeclaration) compilationUnit.types().get(0));
+            Double newLcom2 = lcom2Calculator.getValue(classAfterAddingCluster);
 
             double benefit = oldLcom2 - Math.max(oldLcom2, newLcom2);
             System.out.println("New LCOM2: " + newLcom2 + ", benefit: " + benefit);
@@ -111,6 +103,18 @@ public class Heuristic1 {
         return bestCluster;
     }
 
+    public TypeDeclaration createNewClassAfterAddingCluster(List<Integer> cluster) {
+        String newSourceCode = this.getNewSourceCode(cluster);
+        ASTBuilder builder = new ASTBuilder(this.sourcePaths);
+        ASTParser parser = builder.create();
+        parser.setSource(newSourceCode.toCharArray());
+        CompilationUnit compilationUnit = (CompilationUnit) parser.createAST(null);
+        return (TypeDeclaration) compilationUnit.types().get(0);
+    }
+
+    public TypeDeclaration getClassAfterAddingCluster() {
+        return this.classAfterAddingCluster;
+    }
     private String getNewSourceCode(List<Integer> cluster){
 
         CompilationUnit compilationUnit = this.method.getSourceFile().getCompilationUnit();
@@ -213,6 +217,9 @@ public class Heuristic1 {
     }
 
     private List<ASTNode> statementToMove(List<ASTNode> statementNodes, List<Integer> cluster) {
+        if (statementNodes == null || statementNodes.size() == 0) {
+            return new ArrayList<>();
+        }
         int start = cluster.get(0)-1;
         int end = cluster.get(1)-1;
         ASTNode node = statementNodes.get(start);
