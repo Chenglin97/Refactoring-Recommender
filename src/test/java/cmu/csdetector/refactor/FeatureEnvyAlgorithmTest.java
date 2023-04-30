@@ -81,5 +81,7 @@ public class FeatureEnvyAlgorithmTest {
 
         List<Resource> result_classes = detector.featureEnvyAlgorithm(featureEnvies, sourceClasses, target_classes);
         Assertions.assertEquals(2, result_classes.size());
+        Assertions.assertEquals("cmu.csdetector.dummy.smells.RefusedBequestSample", result_classes.get(0).getFullyQualifiedName());
+        Assertions.assertEquals("cmu.csdetector.dummy.smells.BlobClassSample", result_classes.get(1).getFullyQualifiedName());
     }
 }
