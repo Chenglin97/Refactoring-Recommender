@@ -1,6 +1,8 @@
 package cmu.csdetector.refactor;
 
 import cmu.csdetector.ast.ASTBuilder;
+import cmu.csdetector.ast.visitors.CyclomaticComplexityVisitor;
+import cmu.csdetector.ast.visitors.ParameterCollector;
 import cmu.csdetector.ast.visitors.StatementCollector;
 import cmu.csdetector.metrics.calculators.type.LCOM2Calculator;
 import cmu.csdetector.resources.Method;
@@ -32,6 +34,18 @@ public class Heuristic1 {
         StatementCollector statementCollector = new StatementCollector();
         node.accept(statementCollector);
         this.statementNodes = statementCollector.getNodesCollected();
+
+        for (ASTNode n: this.statementNodes) {
+            ParameterCollector parameterCollector = new ParameterCollector();
+            n.accept(parameterCollector);
+            Set<String> parameters = parameterCollector.getParameters();
+            for (String s : parameters) {
+                System.out.print(s + ", ");
+            }
+            System.out.println("");
+        }
+
+
         TreeMap<Integer, Set<String>> matrix = statementCollector.getMatrix();
         HashMap<String, List<Integer>> transformedMatrix = this.transformMatrix(matrix);
 
