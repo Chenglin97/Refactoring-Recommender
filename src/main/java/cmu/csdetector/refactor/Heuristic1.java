@@ -2,7 +2,6 @@ package cmu.csdetector.refactor;
 
 import cmu.csdetector.ast.ASTBuilder;
 import cmu.csdetector.ast.visitors.CyclomaticComplexityVisitor;
-import cmu.csdetector.ast.visitors.ParameterCollector;
 import cmu.csdetector.ast.visitors.StatementCollector;
 import cmu.csdetector.metrics.calculators.type.LCOM2Calculator;
 import cmu.csdetector.resources.Method;
