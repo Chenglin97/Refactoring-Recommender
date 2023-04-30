@@ -97,7 +97,8 @@ public class CodeSmellDetector {
 
     }
 
-    private void featureEnvyAlgorithm(List<Method> featureEnvies, ArrayList<Resource> sourceClasses, ArrayList<Resource> classes) {
+    public List<Resource> featureEnvyAlgorithm(List<Method> featureEnvies, ArrayList<Resource> sourceClasses, ArrayList<Resource> classes) {
+        List<Resource> target_classes = new ArrayList<>();
         for (int i = 0; i < featureEnvies.size(); i++) {
             Method method = featureEnvies.get(i);
             Resource sourceClass = sourceClasses.get(i);
@@ -106,8 +107,9 @@ public class CodeSmellDetector {
             // extract the entire method
             MethodMover methodMover = new MethodMover();
             Resource classToMoveMethodTo = methodMover.moveMethod(method.getNode(), sourceClass, classes);
-
+            target_classes.add(classToMoveMethodTo);
         }
+        return target_classes;
     }
 
     private void refactor(List<Type> allTypes, List<String> sourcePaths) {
