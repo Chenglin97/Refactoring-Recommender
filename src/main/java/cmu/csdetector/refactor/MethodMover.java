@@ -35,8 +35,7 @@ public class MethodMover {
 
             Double new_source_lcom_3 = calculateLCOM3WithoutMethod(method_node, source_class);
             Double new_target_lcom_3 = lcom3Calculator.calculateWithAdditionalMethod(target_class, method_node);
-
-            System.out.println("target class: " + target_class.getFullyQualifiedName());
+            System.out.println("checking target class: " + target_class.getFullyQualifiedName());
             System.out.println("old source lcom3: " + old_source_lcom_3);
             System.out.println("new source lcom3: " + new_source_lcom_3);
             System.out.println("old target lcom3: " + old_target_lcom_3);
@@ -45,6 +44,7 @@ public class MethodMover {
             sum_lcom3_values.put(target_class, new_target_lcom_3 + new_source_lcom_3);
         }
         Resource target_class = getBestTargetClass();
+        System.out.println("recommended target class: " + target_class.getFullyQualifiedName());
         return target_class;
     }
 
