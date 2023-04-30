@@ -39,10 +39,11 @@ public class Heuristic1 {
         // Generate clusters
         this.generateClusters(transformedMatrix, matrix.size());
         System.out.println("\nAll Clusters: " + this.clusters);
+        if (this.clusters.isEmpty()) return new ArrayList<>();
 
         // Remove invalid clusters
-//        System.out.println("Nodes: " + (ASTNode.nodeClassForType(statementNodes.get(3).getParent().getNodeType()).getSimpleName() == "IfStatement"));
-//        System.out.println("Nodes: " + statementNodes.get(7).getParent().getParent());
+//        System.out.println("Nodes: " + ASTNode.nodeClassForType(statementNodes.get(28).getNodeType()).getSimpleName());
+//        System.out.println("Nodes: " + statementNodes.get(41));
 //        for (ASTNode ancestor : this.getAncestors(statementNodes.get(7))) {
 //            System.out.println(ASTNode.nodeClassForType(ancestor.getNodeType()));
 //        }
@@ -260,41 +261,55 @@ public class Heuristic1 {
         Set<List<Integer>> invalidClusters = new HashSet<>();
         for (List<Integer> cluster : this.clusters) {
             if (!this.isSyntacticallyValid(cluster)) invalidClusters.add(cluster);
-            if (!this.isContinueBreakValid(cluster)) invalidClusters.add(cluster);
+            if (!this.isLoopValid(cluster)) invalidClusters.add(cluster);
         }
         this.clusters.removeAll(invalidClusters);
     }
 
     private boolean isSyntacticallyValid(List<Integer> cluster) {
         ASTNode start = this.statementNodes.get(cluster.get(0)-1);
-        if (ASTNode.nodeClassForType(start.getParent().getNodeType()) == IfStatement.class) start = start.getParent();
+        if (start.getParent() instanceof IfStatement) start = start.getParent();
+        if (start.getParent() instanceof IfStatement) { return false; } // a.k.a. the cluster starts on an else if
         ASTNode end = this.statementNodes.get(cluster.get(1)-1);
         ASTNode next = (cluster.get(1) < this.statementNodes.size()) ? this.statementNodes.get(cluster.get(1)) : null;
-        if (next == null || this.getAncestors(start).contains(next.getParent())) {
-            int c = (int)Math.signum(this.getAncestors(end).size() - this.getAncestors(start).size());
-            switch (c) {
-                case -1:
-                    break;
-                case 0:
-                    if (end.getParent().equals(start.getParent())) return true;
-                case 1:
-                    return true;
-            }
+        if ((next == null || this.getAncestors(start).contains(next.getParent())) && this.getAncestors(end).contains(start.getParent())) {
+//            int c = (int)Math.signum(this.getAncestors(end).size() - this.getAncestors(start).size());
+//            switch (c) {
+//                case -1:
+//                    break;
+//                case 0:
+//                    if (end.getParent().equals(start.getParent())) return true;
+//                case 1:
+//                    return true;
+//            }
+            return true;
         }
         return false;
     }
-    private boolean isContinueBreakValid(List<Integer> cluster) {
+    private boolean isLoopValid(List<Integer> cluster) {
         List<ASTNode> clusterNodes = new ArrayList<>();
         for (int i = cluster.get(0)-1; i < cluster.get(1); i++) {
             ASTNode node = this.statementNodes.get(i);
             clusterNodes.add(node);
             switch (ASTNode.nodeClassForType(node.getNodeType()).getSimpleName()) {
                 case "BreakStatement":
-                case "ContinueStatement":
-                    while (!ASTNode.nodeClassForType(node.getNodeType()).equals(ForStatement.class) && !ASTNode.nodeClassForType(node.getParent().getNodeType()).equals(WhileStatement.class)) {
+                    while (!(node instanceof ForStatement || node instanceof WhileStatement || node instanceof SwitchStatement)) {
                         node = node.getParent();
                     }
                     if (!clusterNodes.contains(node)) return false;
+                    break;
+                case "ContinueStatement":
+                    while (!(node instanceof ForStatement || node instanceof WhileStatement)) {
+                        node = node.getParent();
+                    }
+                    if (!clusterNodes.contains(node)) return false;
+                    break;
+                case "SwitchCase":
+                    while (!(node instanceof SwitchStatement)) {
+                        node = node.getParent();
+                    }
+                    if (!clusterNodes.contains(node)) return false;
+                    break;
             }
         }
         return true;
