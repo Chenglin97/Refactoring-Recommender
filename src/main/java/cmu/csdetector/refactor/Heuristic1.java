@@ -15,6 +15,7 @@ public class Heuristic1 {
     private final String[] sourcePaths;
     private List<ASTNode> statementNodes;
     private Set<List<Integer>> clusters = new HashSet<>();
+    private List<ExtractMethodOpportunity> opportunities = new ArrayList<>();
 
     public Heuristic1(Method method, List<String> sourcePaths) {
         this.method = method;
@@ -224,6 +225,12 @@ public class Heuristic1 {
         return returnList;
     }
 
+    private void groupClusters() {
+        for (List<Integer> cluster : this.clusters) {
+            this.opportunities.add(new ExtractMethodOpportunity(cluster));
+        }
+        // TODO: Group by benefit
+    }
 
     private void removeInvalidClusters() {
         Set<List<Integer>> invalidClusters = new HashSet<>();
