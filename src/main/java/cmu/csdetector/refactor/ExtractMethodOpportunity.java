@@ -8,6 +8,7 @@ public class ExtractMethodOpportunity {
     private List<Integer> cluster;
     private float benefit;
     private List<ExtractMethodOpportunity> alternatives = new ArrayList<>();
+    private List<String> parameters = new ArrayList<String>();
     private boolean isAlternative = false;
 
     public ExtractMethodOpportunity(List<Integer> cluster) {
