@@ -53,6 +53,26 @@ public class Heuristic1 {
             this.opportunities.add(new ExtractMethodOpportunity(cluster));
         }
 
+        // add input parameters with cluster
+        for (ExtractMethodOpportunity extraMethodOpp : this.opportunities){
+            System.out.println(extraMethodOpp.getCluster());
+            int left_cluster = extraMethodOpp.getCluster().get(0);
+            int right_cluster = extraMethodOpp.getCluster().get(1);
+            ASTNode finalASTNode = statementNodes.get(left_cluster-1);
+            String str = statementNodes.get(left_cluster-1).toString();
+            // check wether it's a cluster or not
+            if (str.charAt(0) == '{'){
+                finalASTNode = statementNodes.get(left_cluster-1).getParent();
+            }
+            System.out.println(finalASTNode);
+
+            // how can i know that it's a cluster
+//            System.out.println(statementNodes.get(left_cluster-1).getParent());
+
+
+
+        }
+
         return getBestCluster();
     }
 
