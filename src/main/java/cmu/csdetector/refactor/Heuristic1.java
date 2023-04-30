@@ -352,52 +352,52 @@ public class Heuristic1 {
 //        mergedClusters.add(List.of(low, high));
 
         // New Algorithm
-        for (int i = 0; i < baseClusters.size(); i++) {
-            int low = baseClusters.get(i).get(0);
-            int i_high = baseClusters.get(i).get(1);
-            int high = i_high;
-            for (int j = i+1; j < baseClusters.size(); j++) {
-                int j_low = baseClusters.get(j).get(0);
-                int j_high = baseClusters.get(j).get(1);
-                if (j_low <= high) {
-                    if (j_low <= i_high) {
-                        if (i_high < j_high) {
-                            mergedClusters.add(List.of(low, j_high));
-                        }
-                    }
-                    if (high < j_high) {
-                        high = j_high;
-                        mergedClusters.add(List.of(low, high));
-                    }
-                } else {
-                    mergedClusters.add(List.of(low, high));
-                    break;
-                }
-            }
-        }
-
-        // Elizabeth's Algorithm (THE BEST)
 //        for (int i = 0; i < baseClusters.size(); i++) {
-//            int i_low = baseClusters.get(i).get(0);
+//            int low = baseClusters.get(i).get(0);
 //            int i_high = baseClusters.get(i).get(1);
-//            List<Integer> endPoints = new ArrayList<>();
+//            int high = i_high;
 //            for (int j = i+1; j < baseClusters.size(); j++) {
 //                int j_low = baseClusters.get(j).get(0);
 //                int j_high = baseClusters.get(j).get(1);
-//                // case 1
-//                if (j_low < i_high && j_high > i_high) {
-//                    mergedClusters.add(List.of(i_low, j_high));
-//                    endPoints.add(j_high);
-//                } else {
-//                    // case 2
-//                    int foundIndex = findIntegerInRange(endPoints, j_low, j_high);
-//                    if (foundIndex != -1){
-//                        mergedClusters.add(List.of(i_low, j_high));
-//                        endPoints.add(j_high);
+//                if (j_low <= high) {
+//                    if (j_low <= i_high) {
+//                        if (i_high < j_high) {
+//                            mergedClusters.add(List.of(low, j_high));
+//                        }
 //                    }
+//                    if (high < j_high) {
+//                        high = j_high;
+//                        mergedClusters.add(List.of(low, high));
+//                    }
+//                } else {
+//                    mergedClusters.add(List.of(low, high));
+//                    break;
 //                }
 //            }
 //        }
+
+        // Elizabeth's Algorithm
+        for (int i = 0; i < baseClusters.size(); i++) {
+            int i_low = baseClusters.get(i).get(0);
+            int i_high = baseClusters.get(i).get(1);
+            List<Integer> endPoints = new ArrayList<>();
+            for (int j = i+1; j < baseClusters.size(); j++) {
+                int j_low = baseClusters.get(j).get(0);
+                int j_high = baseClusters.get(j).get(1);
+                // case 1
+                if (j_low < i_high && j_high > i_high) {
+                    mergedClusters.add(List.of(i_low, j_high));
+                    endPoints.add(j_high);
+                } else {
+                    // case 2
+                    int foundIndex = findIntegerInRange(endPoints, j_low, j_high);
+                    if (foundIndex != -1){
+                        mergedClusters.add(List.of(i_low, j_high));
+                        endPoints.add(j_high);
+                    }
+                }
+            }
+        }
 
         mergedClusters.addAll(baseClusters);
         mergedClusters = new ArrayList<>(new HashSet<>(mergedClusters));
