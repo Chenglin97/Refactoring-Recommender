@@ -41,13 +41,17 @@ public class Heuristic1 {
         System.out.println("\nAll Clusters: " + this.clusters);
 
         // Remove invalid clusters
-//        System.out.println("Nodes: " + ASTNode.nodeClassForType(statementNodes.get(3).getParent().getNodeType()));
-//        System.out.println("Nodes: " + statementNodes.get(19));
+//        System.out.println("Nodes: " + ASTNode.nodeClassForType(statementNodes.get(3).getParent().getNodeType()).getSimpleName());
+//        System.out.println("Nodes: " + statementNodes.get(22));
 //        for (ASTNode ancestor : this.getAncestors(statementNodes.get(7))) {
 //            System.out.println(ASTNode.nodeClassForType(ancestor.getNodeType()));
 //        }
         this.removeInvalidClusters();
         System.out.println("\nValid Clusters: " + this.clusters);
+
+        for (List<Integer> cluster : this.clusters) {
+            this.opportunities.add(new ExtractMethodOpportunity(cluster));
+        }
 
         return getBestCluster();
     }
@@ -226,9 +230,6 @@ public class Heuristic1 {
     }
 
     private void groupClusters() {
-        for (List<Integer> cluster : this.clusters) {
-            this.opportunities.add(new ExtractMethodOpportunity(cluster));
-        }
         // TODO: Group by benefit
     }
 
@@ -258,6 +259,16 @@ public class Heuristic1 {
             }
         }
         return false;
+    }
+    private boolean isContinueBreakValid(List<Integer> cluster) {
+        List<ASTNode> clusterNodes = new ArrayList<>();
+        for (int i = cluster.get(0)-1; i < cluster.get(1); i++) {
+            switch (ASTNode.nodeClassForType(this.statementNodes.get(i).getNodeType()).getName()) {
+
+            }
+            clusterNodes.add(this.statementNodes.get(i));
+        }
+        return true;
     }
 
     private List<ASTNode> getAncestors(ASTNode node) {
