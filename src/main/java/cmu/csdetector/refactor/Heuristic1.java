@@ -41,8 +41,8 @@ public class Heuristic1 {
         System.out.println("\nAll Clusters: " + this.clusters);
 
         // Remove invalid clusters
-//        System.out.println("Nodes: " + ASTNode.nodeClassForType(statementNodes.get(3).getParent().getNodeType()).getSimpleName());
-//        System.out.println("Nodes: " + statementNodes.get(22));
+//        System.out.println("Nodes: " + (ASTNode.nodeClassForType(statementNodes.get(3).getParent().getNodeType()).getSimpleName() == "IfStatement"));
+//        System.out.println("Nodes: " + statementNodes.get(7).getParent().getParent());
 //        for (ASTNode ancestor : this.getAncestors(statementNodes.get(7))) {
 //            System.out.println(ASTNode.nodeClassForType(ancestor.getNodeType()));
 //        }
@@ -237,6 +237,7 @@ public class Heuristic1 {
         Set<List<Integer>> invalidClusters = new HashSet<>();
         for (List<Integer> cluster : this.clusters) {
             if (!this.isSyntacticallyValid(cluster)) invalidClusters.add(cluster);
+            if (!this.isContinueBreakValid(cluster)) invalidClusters.add(cluster);
         }
         this.clusters.removeAll(invalidClusters);
     }
@@ -253,7 +254,6 @@ public class Heuristic1 {
                     break;
                 case 0:
                     if (end.getParent().equals(start.getParent())) return true;
-                    break;
                 case 1:
                     return true;
             }
@@ -263,10 +263,16 @@ public class Heuristic1 {
     private boolean isContinueBreakValid(List<Integer> cluster) {
         List<ASTNode> clusterNodes = new ArrayList<>();
         for (int i = cluster.get(0)-1; i < cluster.get(1); i++) {
-            switch (ASTNode.nodeClassForType(this.statementNodes.get(i).getNodeType()).getName()) {
-
+            ASTNode node = this.statementNodes.get(i);
+            clusterNodes.add(node);
+            switch (ASTNode.nodeClassForType(node.getNodeType()).getSimpleName()) {
+                case "BreakStatement":
+                case "ContinueStatement":
+                    while (!ASTNode.nodeClassForType(node.getNodeType()).equals(ForStatement.class) && !ASTNode.nodeClassForType(node.getParent().getNodeType()).equals(WhileStatement.class)) {
+                        node = node.getParent();
+                    }
+                    if (!clusterNodes.contains(node)) return false;
             }
-            clusterNodes.add(this.statementNodes.get(i));
         }
         return true;
     }
