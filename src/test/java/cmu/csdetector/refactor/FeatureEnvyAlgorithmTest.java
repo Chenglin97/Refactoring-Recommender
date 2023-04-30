@@ -6,6 +6,8 @@ import cmu.csdetector.resources.Resource;
 import cmu.csdetector.resources.Type;
 import cmu.csdetector.util.GenericCollector;
 import cmu.csdetector.util.TypeLoader;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -54,22 +56,22 @@ public class FeatureEnvyAlgorithmTest {
 
     @Test
     public void testFeatureEnvyAlgorithm() {
-        ArrayList<Method> featureEnvies = new ArrayList<>();
+        ArrayList<MethodDeclaration> featureEnvies = new ArrayList<>();
 
         ArrayList<Resource> sourceClasses = new ArrayList<>();
         String testClassName = "FeatureEnvyMethod";
         Type sourceClass = testTypes.get(testClassName);
         sourceClasses.add((Resource) sourceClass);
         String testMethodName = "superForeign";
-        Method method = testMethods.get(testClassName).get(testMethodName);
-        featureEnvies.add(method);
+        ASTNode methodNode = testMethods.get(testClassName).get(testMethodName).getNode();
+        featureEnvies.add((MethodDeclaration) methodNode);
 
         testClassName = "BlobClassSample";
         sourceClass = testTypes.get(testClassName);
         sourceClasses.add((Resource) sourceClass);
         testMethodName = "a";
-        method = testMethods.get(testClassName).get(testMethodName);
-        featureEnvies.add(method);
+        methodNode = testMethods.get(testClassName).get(testMethodName).getNode();
+        featureEnvies.add((MethodDeclaration) methodNode);
 
         ArrayList<Resource> target_classes = new ArrayList<>();
         target_classes.add((Resource) (testTypes.get("FieldAccessedByMethod")));
