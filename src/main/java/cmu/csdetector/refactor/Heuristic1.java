@@ -60,16 +60,11 @@ public class Heuristic1 {
             int right_cluster = extraMethodOpp.getCluster().get(1);
             ASTNode finalASTNode = statementNodes.get(left_cluster-1);
             String str = statementNodes.get(left_cluster-1).toString();
-            // check wether it's a cluster or not
+            // check whether it's a cluster or not
             if (str.charAt(0) == '{'){
                 finalASTNode = statementNodes.get(left_cluster-1).getParent();
             }
             System.out.println(finalASTNode);
-
-            // how can i know that it's a cluster
-//            System.out.println(statementNodes.get(left_cluster-1).getParent());
-
-
 
         }
 
