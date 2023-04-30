@@ -10,7 +10,9 @@ import cmu.csdetector.metrics.MethodMetricValueCollector;
 import cmu.csdetector.metrics.TypeMetricValueCollector;
 import cmu.csdetector.metrics.calculators.type.LCOM2Calculator;
 import cmu.csdetector.refactor.Heuristic1;
+import cmu.csdetector.refactor.MethodMover;
 import cmu.csdetector.resources.ParenthoodRegistry;
+import cmu.csdetector.resources.Resource;
 import cmu.csdetector.resources.loader.SourceFileASTRequestor;
 import cmu.csdetector.smells.ClassLevelSmellDetector;
 import cmu.csdetector.smells.MethodLevelSmellDetector;
@@ -95,9 +97,16 @@ public class CodeSmellDetector {
 
     }
 
-    private void featureEnvyAlgorithm(List<Method> featureEnvies) {
-        for (Method method: featureEnvies) {
-            // TODO run heuristics
+    private void featureEnvyAlgorithm(List<Method> featureEnvies, ArrayList<Resource> sourceClasses, ArrayList<Resource> classes) {
+        for (int i = 0; i < featureEnvies.size(); i++) {
+            Method method = featureEnvies.get(i);
+            Resource sourceClass = sourceClasses.get(i);
+            // TODO extract the best code fragment
+
+            // extract the entire method
+            MethodMover methodMover = new MethodMover();
+            Resource classToMoveMethodTo = methodMover.moveMethod(method.getNode(), sourceClass, classes);
+
         }
     }
 
@@ -111,22 +120,27 @@ public class CodeSmellDetector {
                 complexClasses.add(type);
             }
         }
-        System.out.println("Analyze complex class, " + complexClasses.size() + " classes are complex class.");
+        System.out.println("Analyze complex class, " + complexClasses.size() + " classes are complex classes.");
         this.complexClassAlgorithm(complexClasses, sourcePaths);
 
         // get featureEnvy
         List<Method> featureEnvies = new ArrayList<>();
+        ArrayList<Resource> canidateClasses = new ArrayList<>();
+        ArrayList<Resource> featureEnvyClasses = new ArrayList<>();
         FeatureEnvy detector = new FeatureEnvy();
         for (Type type : allTypes) {
+            System.out.println("Analyzing feature envy in " + type.toString() + "...");
+            canidateClasses.add(type);
             for (Method method : type.getMethods()) {
                 List<Smell> smells = detector.detect(method);
                 if (smells.size() > 0) {
                     featureEnvies.add(method);
+                    featureEnvyClasses.add(type);
                 }
             }
         }
-        System.out.println("Analyze feature envy, " + featureEnvies.size() + " methods are feature envy.");
-        this.featureEnvyAlgorithm(featureEnvies);
+        System.out.println("Analyze feature envy, " + featureEnvies.size() + " methods have feature envy.");
+        this.featureEnvyAlgorithm(featureEnvies, featureEnvyClasses, canidateClasses);
     }
 
 
