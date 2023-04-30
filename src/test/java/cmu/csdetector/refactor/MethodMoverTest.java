@@ -74,7 +74,7 @@ public class MethodMoverTest {
         Method method = testMethods.get(testClassName).get(testMethodName);
         Resource target_class = methodMover.moveMethod(method.getNode(), testTypes.get(testClassName), target_classes);
 
-        Assertions.assertEquals(testTypes.get("FieldAccessedByMethod"), target_class);
+        Assertions.assertEquals(testTypes.get("RefusedBequestSample"), target_class);
     }
 
 
