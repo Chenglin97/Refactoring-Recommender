@@ -9,7 +9,9 @@
 
 ## Instructions for Leo
 1. Clone the Repository
-2. Download the Refactoring Examples and Extract the folders. https://drive.google.com/drive/folders/1i4R4uDra2EZ6v7Kth1ZLdxWhhxUkysBp?usp=share_link https://drive.google.com/drive/folders/1VU5GWR1a5CgbguhrUuLaFflgVmQpEBQj?usp=sharing
+2. Download the Refactoring Examples and Extract the folders. 
+[folder1](https://drive.google.com/file/d/1Ke4USFEHlGrGKnmBOQVwKMt9axc6aKSX/view?usp=share_link) 
+[folder2](https://drive.google.com/file/d/1XWGxtw4ISYqBV7fY7I2v_IWqilDLjAle/view?usp=share_link)
 3. Extract both folders and put them in the same parent folder as our repository. You should have a folder with the following content:
   ``` 
       s23/Refactoring-Recommender
