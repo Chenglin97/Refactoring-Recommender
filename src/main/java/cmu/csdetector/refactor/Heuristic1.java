@@ -75,8 +75,12 @@ public class Heuristic1 {
 //            System.out.println("Cluster: " + opportunity.getCluster() + " Benefit: " + benefit);
             opportunity.setBenefit(benefit);
         }
-        this.groupClusters();
 
+        List<List<ExtractMethodOpportunity>> clusters = this.groupClusters();
+        List<Integer> best_cluster = clusters.get(0).get(0).getCluster();
+
+//        Uncomment line below to use non-paper custom logic
+//        best_cluster = getBestCluster();
 
         return getBestCluster();
     }
