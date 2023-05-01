@@ -16,6 +16,7 @@ public class ExtractMethodOpportunity {
     public void setParameters(List<String> parameters) {
         this.parameters = parameters;
     }
+    public List<String> getParameters() { return this.parameters; }
 
     public ExtractMethodOpportunity(List<Integer> cluster) {
         this.cluster = cluster;
