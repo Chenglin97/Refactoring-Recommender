@@ -1,7 +1,7 @@
 package cmu.csdetector.refactor;
 
 import cmu.csdetector.ast.ASTBuilder;
-import cmu.csdetector.ast.visitors.CyclomaticComplexityVisitor;
+import cmu.csdetector.ast.visitors.ExpressionStatementVisitor;
 import cmu.csdetector.ast.visitors.ParameterCollector;
 import cmu.csdetector.ast.visitors.StatementCollector;
 import cmu.csdetector.metrics.calculators.type.LCOM2Calculator;
@@ -18,6 +18,7 @@ public class Heuristic1 {
     private Set<List<Integer>> clusters = new HashSet<>();
     private List<ExtractMethodOpportunity> opportunities = new ArrayList<>();
     private TypeDeclaration classAfterAddingCluster;
+
 
     public Heuristic1(Method method, List<String> sourcePaths) {
         this.method = method;
@@ -56,6 +57,8 @@ public class Heuristic1 {
         for (List<Integer> cluster : this.clusters) {
             ExtractMethodOpportunity emo = new ExtractMethodOpportunity(cluster);
             emo.setParameters(this.getParameters(cluster));
+            emo.setReturnType(this.getReturnType(cluster));
+            System.out.println(emo.getReturnType());
             this.opportunities.add(emo);
         }
 
@@ -116,6 +119,34 @@ public class Heuristic1 {
         return Math.max(p - q, 0);
     }
 
+    private String getReturnType(List<Integer> cluster) {
+        List<ASTNode> nodes = this.statementToMove(this.statementNodes, cluster);
+        Set<String> assignments = new HashSet<>();
+
+        for (ASTNode node : nodes) {
+            ExpressionStatementVisitor assignStatementVisitor = new ExpressionStatementVisitor();
+            node.accept(assignStatementVisitor);
+            assignments.addAll(assignStatementVisitor.getExpressions());
+        }
+
+        List<String> potentialReturnType = new ArrayList<>(assignments);
+        if (cluster.get(1) + 1 > this.matrix.size()) {
+            return "";
+        }
+
+        List<String> parametersAfterCluster = this.getParameters(List.of(cluster.get(1)+1, this.matrix.size()));
+
+        boolean isIntersected = potentialReturnType.retainAll(parametersAfterCluster);
+
+        if (isIntersected) {
+            if (potentialReturnType.size() == 1) {
+                return potentialReturnType.get(0);
+            }
+        }
+
+        return "";
+    }
+
     private List<Integer> getBestCluster() {
 
         // temp ranking
@@ -161,6 +192,7 @@ public class Heuristic1 {
     public TypeDeclaration getClassAfterAddingCluster() {
         return this.classAfterAddingCluster;
     }
+
     private String getNewSourceCode(List<Integer> cluster){
 
         CompilationUnit compilationUnit = this.method.getSourceFile().getCompilationUnit();

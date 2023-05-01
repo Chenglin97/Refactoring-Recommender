@@ -9,6 +9,7 @@ public class ExtractMethodOpportunity {
     private double benefit;
     private List<ExtractMethodOpportunity> alternatives = new ArrayList<>();
     private List<String> parameters = new ArrayList<>();
+    private String returnType = "";
     private boolean isAlternative = false;
 
     public void setParameters(List<String> parameters) {
@@ -22,5 +23,13 @@ public class ExtractMethodOpportunity {
     public List<Integer> getCluster() { return this.cluster; }
     public void setBenefit(double benefit) { this.benefit = benefit; }
     public double getBenefit() { return this.benefit; }
+
+    public String getReturnType(){
+        return this.returnType;
+    }
+
+    public void setReturnType(String returnType) {
+        this.returnType = returnType;
+    }
 
 }
