@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ComplexClass extends SmellDetector {
-    private static final double OVERCOMPLEXITY = 10;
+    private static final double OVERCOMPLEXITY = 5;
     @Override
     public List<Smell> detect(Resource resource) {
         List<Smell> smells = new ArrayList<>();

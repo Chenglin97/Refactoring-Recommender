@@ -11,6 +11,10 @@ import java.util.*;
 
 public class Heuristic1 {
 
+    private static final double MAX_SIZE_DIFFERENCE = 0.2;
+    private static final double MIN_OVERLAP = 0.1;
+    private static final double SIGNIFICANT_DIFFERENCE_THRESHOLD = 0.01;
+
     private final Method method;
     private final String[] sourcePaths;
     private List<ASTNode> statementNodes;
@@ -68,9 +72,10 @@ public class Heuristic1 {
             double opportunityLCOM2 = calculateLCOM2(opportunity.getCluster());
             double refactoredLCOM2 = calculateRestLCOM2(opportunity.getCluster());
             double benefit = originalLCOM2 - Math.max(opportunityLCOM2, refactoredLCOM2);
-            System.out.println("Cluster: " + opportunity.getCluster() + " Benefit: " + benefit);
+//            System.out.println("Cluster: " + opportunity.getCluster() + " Benefit: " + benefit);
             opportunity.setBenefit(benefit);
         }
+        this.groupClusters();
 
 
         return getBestCluster();
@@ -331,6 +336,22 @@ public class Heuristic1 {
 
     private void groupClusters() {
         // TODO: Group by benefit
+        for (int i = 0; i < this.opportunities.size(); i++) {
+            ExtractMethodOpportunity opp = this.opportunities.get(i);
+            if (opp.isAlternative) continue;
+            for (int j = i+1; j < this.opportunities.size(); j++) {
+                ExtractMethodOpportunity other_opp = this.opportunities.get(j);
+                if (!other_opp.isAlternative && opp.differenceInSize(other_opp) <= MAX_SIZE_DIFFERENCE && opp.overlap(other_opp) >= MIN_OVERLAP) {
+                    if (opp.getBenefit() > other_opp.getBenefit()) {
+                        opp.addAlternative(other_opp);
+                        other_opp.isAlternative = true;
+                    } else {
+                        other_opp.addAlternative(opp);
+                        opp.isAlternative = true;
+                    }
+                }
+            }
+        }
     }
 
     private void removeInvalidClusters() {
