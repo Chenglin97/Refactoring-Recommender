@@ -102,4 +102,56 @@ public class Heuristic1Test {
 
         Assertions.assertEquals(result_class.getFullyQualifiedName(), "cmu.csdetector.dummy.heu1.ArchiveFileSet");
     }
+
+    @Test
+    public void RunFEAlgorithmFromCluster() {
+        /* should be able to get target classes to move the cluster to */
+        ArrayList<String> sourcePaths = new ArrayList<>();
+        sourcePaths.add("../RefactoringTest");
+        Method method = testMethods.get("testFile").get("grabManifests");
+        Resource sourceClass = (Resource) testTypes.get("testFile");
+        Heuristic1 heuristic1 = new Heuristic1(method, sourcePaths);
+        heuristic1.generateExtractOpportunity();
+        List<Integer> cluster = new ArrayList<>();
+        cluster.add(4);
+        cluster.add(7);
+        TypeDeclaration classAfterAddingCluster = heuristic1.createNewClassAfterAddingCluster(cluster);
+        ArrayList<MethodDeclaration> methodDeclarations = new ArrayList<>(classAfterAddingCluster.bodyDeclarations());
+
+        MethodDeclaration methodToMove = methodDeclarations.get(methodDeclarations.size() - 1);
+        MethodMover methodMover = new MethodMover();
+        /* Call feature envy algorithm to get target classes */
+        ArrayList<Resource> target_classes = new ArrayList<>();
+        target_classes.add((Resource) (testTypes.get("FileSet")));
+        target_classes.add((Resource) (testTypes.get("Resource")));
+        target_classes.add((Resource) (testTypes.get("ArchiveFileSet")));
+
+        Resource result_class = methodMover.moveMethod((ASTNode) methodToMove, sourceClass, target_classes);
+
+        Assertions.assertEquals(result_class.getFullyQualifiedName(), "cmu.csdetector.dummy.heu1.ArchiveFileSet");
+    }
+
+    @Test
+    public void runFEAlgorithmFromCluster() {
+        ArrayList<String> sourcePaths = new ArrayList<>();
+        sourcePaths.add("../RefactoringTest");
+        Method method = testMethods.get("testFile").get("grabManifests");
+        Resource sourceClass = (Resource) testTypes.get("testFile");
+        Heuristic1 heuristic1 = new Heuristic1(method, sourcePaths);
+        heuristic1.generateExtractOpportunity();
+        List<Integer> cluster = new ArrayList<>();
+
+        MethodMover methodMover = new MethodMover();
+        ArrayList<Resource> target_classes = new ArrayList<>();
+        target_classes.add((Resource) (testTypes.get("FileSet")));
+        target_classes.add((Resource) (testTypes.get("Resource")));
+        target_classes.add((Resource) (testTypes.get("ArchiveFileSet")));
+
+
+        // Call moveMethodFromCluster to get the result class
+        Resource result_class = methodMover.moveMethodFromCluster(method, sourceClass, sourcePaths, cluster, target_classes);
+
+        Assertions.assertEquals(result_class.getFullyQualifiedName(), "cmu.csdetector.dummy.heu1.ArchiveFileSet");
+    }
+
 }

@@ -65,7 +65,7 @@ public class Heuristic1 {
             if (str.charAt(0) == '{'){
                 finalASTNode = statementNodes.get(left_cluster-1).getParent();
             }
-            System.out.println(finalASTNode);
+
 
         }
 

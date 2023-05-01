@@ -29,7 +29,7 @@ public class ExternalClassVariableCollector extends ASTVisitor {
         if (binding == null) {
             return false;
         }
-        if (binding.getKind() == IBinding.VARIABLE) {
+        if (binding.getKind() == IBinding.VARIABLE ||  binding.getKind() == IBinding.TYPE) {
             Expression expression = (Expression) node;
             String class_name = expression.resolveTypeBinding().getName();
             externalClassVariableCount.put(class_name, externalClassVariableCount.getOrDefault(class_name, 0) + 1);

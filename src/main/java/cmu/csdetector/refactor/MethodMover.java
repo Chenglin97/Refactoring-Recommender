@@ -36,21 +36,21 @@ public class MethodMover {
 
             Double new_source_lcom_3 = calculateLCOM3WithoutMethod(method_node, source_class);
             Double new_target_lcom_3 = lcom3Calculator.calculateWithAdditionalMethod(target_class, method_node);
-            System.out.println("checking target class: " + target_class.getFullyQualifiedName());
-            System.out.println("old source lcom3: " + old_source_lcom_3);
-            System.out.println("new source lcom3: " + new_source_lcom_3);
-            System.out.println("old target lcom3: " + old_target_lcom_3);
-            System.out.println("new target lcom3: " + new_target_lcom_3);
+//            System.out.println("checking target class: " + target_class.getFullyQualifiedName());
+//            System.out.println("old source lcom3: " + old_source_lcom_3);
+//            System.out.println("new source lcom3: " + new_source_lcom_3);
+//            System.out.println("old target lcom3: " + old_target_lcom_3);
+//            System.out.println("new target lcom3: " + new_target_lcom_3);
             Double lcom_reduction = new_target_lcom_3 + new_source_lcom_3 - old_target_lcom_3 - old_source_lcom_3;
             Double cohesion_improvement = -lcom_reduction;
-            System.out.println("cohesion improvement: " + cohesion_improvement);
+//            System.out.println("cohesion improvement: " + cohesion_improvement);
 
             sum_lcom3_values.put(target_class, cohesion_improvement);
         }
 
         Resource target_class = getBestTargetClass(source_class);
-        System.out.println("recommended target class: " + target_class.getFullyQualifiedName());
-
+//        System.out.println("recommended target class: " + target_class.getFullyQualifiedName());
+        System.out.println("Recommended operation: Move method " + method_node.toString() + " from " + source_class.getFullyQualifiedName() + " to " + target_class.getFullyQualifiedName());
         return target_class;
     }
 
@@ -64,9 +64,6 @@ public class MethodMover {
                 max_improvement = improvement;
                 target_class = candidate_class;
             }
-        }
-        if (max_improvement < 0) {
-            return source_class;
         }
         return target_class;
     }
@@ -147,5 +144,15 @@ public class MethodMover {
         TypeDeclaration sourceClassCopyDeclaration = (TypeDeclaration) sourceClassCopy.getNode();
         sourceClassCopyDeclaration.bodyDeclarations().remove(method);
         return sourceClassCopy;
+    }
+
+    public Resource moveMethodFromCluster(Method method, Resource sourceClass, List<String> sourcePaths, List<Integer> cluster, ArrayList<Resource> targetClasses) {
+        Heuristic1 heuristic1 = new Heuristic1(method, sourcePaths);
+        heuristic1.generateExtractOpportunity();
+        TypeDeclaration classAfterAddingCluster = heuristic1.createNewClassAfterAddingCluster(cluster);
+        ArrayList<MethodDeclaration> methodDeclarations = new ArrayList<>(classAfterAddingCluster.bodyDeclarations());
+
+        MethodDeclaration methodToMove = methodDeclarations.get(methodDeclarations.size() - 1);
+        return moveMethod((ASTNode) methodToMove, sourceClass, targetClasses);
     }
 }
