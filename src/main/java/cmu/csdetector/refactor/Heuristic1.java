@@ -50,11 +50,6 @@ public class Heuristic1 {
 //            System.out.println(ASTNode.nodeClassForType(ancestor.getNodeType()));
 //        }
 
-//        MethodInvocationVisitor2 miVisitor = new MethodInvocationVisitor2();
-//        this.statementNodes.get(27).accept(miVisitor);
-//        List<MethodInvocation> methodInvocations = new ArrayList<>(miVisitor.getCalls());
-//        System.out.println("Calls: " + methodInvocations.get(0).getExpression());
-
         this.removeInvalidClusters();
         System.out.println("\nValid Clusters: " + this.clusters);
 
@@ -74,20 +69,6 @@ public class Heuristic1 {
             opportunity.setBenefit(benefit);
         }
 
-        // add input parameters with cluster
-        for (ExtractMethodOpportunity extraMethodOpp : this.opportunities){
-            System.out.println(extraMethodOpp.getCluster());
-            int left_cluster = extraMethodOpp.getCluster().get(0);
-            int right_cluster = extraMethodOpp.getCluster().get(1);
-            ASTNode finalASTNode = statementNodes.get(left_cluster-1);
-            String str = statementNodes.get(left_cluster-1).toString();
-            // check whether it's a cluster or not
-            if (str.charAt(0) == '{'){
-                finalASTNode = statementNodes.get(left_cluster-1).getParent();
-            }
-
-
-        }
 
         return getBestCluster();
     }
@@ -638,6 +619,20 @@ public class Heuristic1 {
 //                    mergedClusters.add(List.of(low, high));
 //                    break;
 //                }
+//            }
+//        }
+
+
+//        // add input parameters with cluster
+//        for (ExtractMethodOpportunity extraMethodOpp : this.opportunities){
+//            System.out.println(extraMethodOpp.getCluster());
+//            int left_cluster = extraMethodOpp.getCluster().get(0);
+//            int right_cluster = extraMethodOpp.getCluster().get(1);
+//            ASTNode finalASTNode = statementNodes.get(left_cluster-1);
+//            String str = statementNodes.get(left_cluster-1).toString();
+//            // check whether it's a cluster or not
+//            if (str.charAt(0) == '{'){
+//                finalASTNode = statementNodes.get(left_cluster-1).getParent();
 //            }
 //        }
 
