@@ -39,7 +39,7 @@ public class Heuristic1 {
         this.sourcePaths = paths;
     }
 
-    public List<Integer> generateExtractOpportunity() {
+    public ExtractMethodOpportunity generateExtractOpportunity() {
         ASTNode node = this.method.getNode();
         StatementCollector statementCollector = new StatementCollector();
         node.accept(statementCollector);
@@ -50,7 +50,7 @@ public class Heuristic1 {
         // Generate clusters
         this.generateClusters(transformedMatrix, matrix.size());
         System.out.println("\nAll Clusters: " + this.clusters);
-        if (this.clusters.isEmpty()) return new ArrayList<>();
+        if (this.clusters.isEmpty()) return null;
 
         // Remove invalid clusters
 //        System.out.println("Nodes: " + ASTNode.nodeClassForType(statementNodes.get(28).getNodeType()).getSimpleName());
@@ -85,22 +85,15 @@ public class Heuristic1 {
 
         writer.save("Best cluster found on lines: " + best_cluster);
         writer.save("Top Alternative Clusters:");
-        int i = 0;
-        for (List<ExtractMethodOpportunity> listOfOpportunities : clusters) {
-            writer.save("CLUSTERS BASED ON " + listOfOpportunities.get(0).getCluster() + ":");
-            for (ExtractMethodOpportunity opportunity : listOfOpportunities) {
-                i++;
-                writer.save("Cluster: " + opportunity.getCluster() + " Benefit: " + opportunity.getBenefit());
-                if (i > 5) {
-                    break;
-                }
-            }
+        writer.save("CLUSTERS BASED ON " + best_cluster + ":");
+        for (ExtractMethodOpportunity opportunity : clusters.get(0)) {
+            writer.save("Cluster: " + opportunity.getCluster() + " Benefit: " + opportunity.getBenefit());
         }
 
 //        Uncomment line below to use non-paper custom logic
 //        best_cluster = getBestCluster();
 
-        return best_cluster;
+        return clusters.get(0).get(0);
     }
 
     private List<String> getParameters(List<Integer> cluster) {
@@ -218,6 +211,46 @@ public class Heuristic1 {
 
     public TypeDeclaration getClassAfterAddingCluster() {
         return this.classAfterAddingCluster;
+    }
+
+    public List<String> modifyMethod(List<Integer> cluster) {
+
+        CompilationUnit compilationUnit = this.method.getSourceFile().getCompilationUnit();
+        AST ast = compilationUnit.getAST();
+
+        // Get nodes to move
+        List<ASTNode> nodes = this.statementToMove(this.statementNodes, cluster);
+
+        if (nodes.size() == 0) {
+            return new ArrayList<>();
+        }
+
+        // New a method
+        MethodDeclaration methodDeclaration = ast.newMethodDeclaration();
+        methodDeclaration.setName(ast.newSimpleName("iLoveRefactoringSoMuchFunMethod"));
+        Block body = ast.newBlock();
+        methodDeclaration.setBody(body);
+
+        for (ASTNode node : nodes) {
+
+            // Sometimes it's a block, which is ifstatement
+            if (node instanceof Block) {
+                node = node.getParent();
+            }
+
+            // Remove child from parent
+            Block block = (Block) node.getParent();
+            block.statements().remove(node);
+
+            // Add statement into new method
+            body.statements().add(node);
+        }
+
+        TypeDeclaration type = (TypeDeclaration) compilationUnit.types().get(0);
+        type.bodyDeclarations().add(methodDeclaration);
+
+        String returnString = compilationUnit.toString();
+        return List.of(this.method.getNode().toString(), methodDeclaration.toString());
     }
 
     private String getNewSourceCode(List<Integer> cluster){
@@ -361,12 +394,12 @@ public class Heuristic1 {
         }
         groups.sort(Comparator.comparingDouble(a -> a.get(0).getBenefit()));
         Collections.reverse(groups);
-        for (List<ExtractMethodOpportunity> group : groups) {
-            System.out.print("\nGroup: ");
-            for (ExtractMethodOpportunity opp : group) {
-                System.out.print(opp.getCluster() + " Benefit: " + opp.getBenefit() + ", ");
-            }
-        }
+//        for (List<ExtractMethodOpportunity> group : groups) {
+//            System.out.print("\nGroup: ");
+//            for (ExtractMethodOpportunity opp : group) {
+//                System.out.print(opp.getCluster() + " Benefit: " + opp.getBenefit() + ", ");
+//            }
+//        }
         // groups is a List<List<ExtractMethodOpportunity>> where groups.get(0) is the highest ranked group and the first opportunity in each group is the primary opportunity.
         return groups;
     }

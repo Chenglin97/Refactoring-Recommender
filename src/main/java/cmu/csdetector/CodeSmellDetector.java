@@ -9,6 +9,7 @@ import cmu.csdetector.console.output.ObservableExclusionStrategy;
 import cmu.csdetector.metrics.MethodMetricValueCollector;
 import cmu.csdetector.metrics.TypeMetricValueCollector;
 import cmu.csdetector.metrics.calculators.type.LCOM2Calculator;
+import cmu.csdetector.refactor.ExtractMethodOpportunity;
 import cmu.csdetector.refactor.Heuristic1;
 import cmu.csdetector.refactor.MethodMover;
 import cmu.csdetector.refactor.SaveRecommendationIntoFile;
@@ -95,17 +96,42 @@ public class CodeSmellDetector {
             writer.save("\nCOMPLEX CLASS: " + type.getFullyQualifiedName());
             for (Method method: type.getMethods()) {
                 writer.save("\nANALYZING METHOD: " + method.getFullyQualifiedName());
-                CyclomaticComplexityVisitor cyclomaticComplexityVisitor = new CyclomaticComplexityVisitor();
-                method.getNode().accept(cyclomaticComplexityVisitor);
-                    // TODO run heuristics
-                Heuristic1 heuristic1 = new Heuristic1(method, sourcePaths);
-                List<Integer> bestCluster = heuristic1.generateExtractOpportunity();
-                if (bestCluster != null && bestCluster.size() > 1) {
-                    System.out.println("The best cluster is from line " + bestCluster.get(0) + " to " + bestCluster.get(1));
-                } else {
-                    writer.save("No clusters found");
-                    System.out.println("No cluster found");
+
+                CyclomaticComplexityVisitor ccVisitor = new CyclomaticComplexityVisitor();
+                method.getNode().accept(ccVisitor);
+                System.out.println("Cyclomatic Complexity: " + ccVisitor.getCyclomaticComplexity());
+
+                List<List<String>> recommendations = new ArrayList<>();
+                while (ccVisitor.getCyclomaticComplexity() > 5) {
+                    // Run heuristics
+                    Heuristic1 heuristic1 = new Heuristic1(method, sourcePaths);
+                    ExtractMethodOpportunity bestOpportunity = heuristic1.generateExtractOpportunity();
+                    List<Integer> bestCluster = bestOpportunity.getCluster();
+
+                    List<String> modifiedMethods = heuristic1.modifyMethod(bestCluster);
+                    List<String> results = new ArrayList<>(modifiedMethods);
+                    ccVisitor = new CyclomaticComplexityVisitor();
+                    method.getNode().accept(ccVisitor);
+                    System.out.println("Cyclomatic Complexity: " + ccVisitor.getCyclomaticComplexity());
+
+                    if (bestCluster != null && bestCluster.size() > 1) {
+                        System.out.println("The best cluster is from line " + bestCluster.get(0) + " to " + bestCluster.get(1));
+                        results.addAll(bestOpportunity.getParameters());
+                        recommendations.add(results);
+                    } else {
+                        writer.save("No clusters found");
+                        System.out.println("No cluster found");
+                    }
                 }
+
+                writer.save("Recommendations:");
+                for (List<String> rec : recommendations) {
+                    writer.save("Extract the following method from " + method.getFullyQualifiedName() + " with parameters: " + rec.get(2));
+                    writer.save(rec.get(1));
+                    writer.save("... so that " + method.getFullyQualifiedName() + " becomes: ");
+                    writer.save(rec.get(0));
+                }
+
             }
         }
 
@@ -123,7 +149,8 @@ public class CodeSmellDetector {
 
             // extract the best code fragment
             Heuristic1 heuristic1 = new Heuristic1(method, sourcePaths);
-            List<Integer> bestCluster = heuristic1.generateExtractOpportunity();
+            ExtractMethodOpportunity bestOpportunity = heuristic1.generateExtractOpportunity();
+            List<Integer> bestCluster = bestOpportunity.getCluster();
 
 
             TypeDeclaration classAfterAddingCluster = heuristic1.createNewClassAfterAddingCluster(bestCluster);
