@@ -148,9 +148,14 @@ public class CodeSmellDetector {
             writer.save("\nFEATURE ENVY IN METHOD: " + method.getFullyQualifiedName());
 
             // extract the best code fragment
+            List<Integer> bestCluster;
             Heuristic1 heuristic1 = new Heuristic1(method, sourcePaths);
             ExtractMethodOpportunity bestOpportunity = heuristic1.generateExtractOpportunity();
-            List<Integer> bestCluster = bestOpportunity.getCluster();
+            if (bestOpportunity == null) {
+                bestCluster = new ArrayList<>();
+            } else {
+                bestCluster = bestOpportunity.getCluster();
+            }
 
 
             TypeDeclaration classAfterAddingCluster = heuristic1.createNewClassAfterAddingCluster(bestCluster);
