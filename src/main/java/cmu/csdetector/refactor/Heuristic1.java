@@ -14,6 +14,7 @@ public class Heuristic1 {
     private final Method method;
     private final String[] sourcePaths;
     private List<ASTNode> statementNodes;
+    private TreeMap<Integer, Set<String>> matrix;
     private Set<List<Integer>> clusters = new HashSet<>();
     private List<ExtractMethodOpportunity> opportunities = new ArrayList<>();
     private TypeDeclaration classAfterAddingCluster;
@@ -34,8 +35,8 @@ public class Heuristic1 {
         StatementCollector statementCollector = new StatementCollector();
         node.accept(statementCollector);
         this.statementNodes = statementCollector.getNodesCollected();
-        TreeMap<Integer, Set<String>> matrix = statementCollector.getMatrix();
-        HashMap<String, List<Integer>> transformedMatrix = this.transformMatrix(matrix);
+        this.matrix = statementCollector.getMatrix();
+        HashMap<String, List<Integer>> transformedMatrix = this.transformMatrix(this.matrix);
 
         // Generate clusters
         this.generateClusters(transformedMatrix, matrix.size());
@@ -61,6 +62,16 @@ public class Heuristic1 {
             ExtractMethodOpportunity emo = new ExtractMethodOpportunity(cluster);
             emo.setParameters(this.getParameters(cluster));
             this.opportunities.add(emo);
+        }
+
+        double originalLCOM2 = calculateLCOM2(List.of(1, this.matrix.size()));
+        System.out.println("OriginalLCOM2: " + originalLCOM2);
+        for (ExtractMethodOpportunity opportunity : this.opportunities) {
+            double opportunityLCOM2 = calculateLCOM2(opportunity.getCluster());
+            double refactoredLCOM2 = calculateRestLCOM2(opportunity.getCluster());
+            double benefit = originalLCOM2 - Math.max(opportunityLCOM2, refactoredLCOM2);
+            System.out.println("Cluster: " + opportunity.getCluster() + " Benefit: " + benefit);
+            opportunity.setBenefit(benefit);
         }
 
         // add input parameters with cluster
@@ -90,6 +101,38 @@ public class Heuristic1 {
             parameters.addAll(parameterCollector.getParameters());
         }
         return new ArrayList<>(parameters);
+    }
+    private double calculateLCOM2(List<Integer> cluster) {
+        double p = 0, q = 0;
+        for (int i = cluster.get(0); i < cluster.get(1); i++) {
+            for (int j = i+1; j <= cluster.get(1); j++) {
+                Set<String> intersection = new HashSet<>(this.matrix.get(i));
+                intersection.retainAll(this.matrix.get(j));
+                if (!intersection.isEmpty()) {
+                    q++;
+                } else {
+                    p++;
+                }
+            }
+        }
+        return Math.max(p - q, 0);
+    }
+    private double calculateRestLCOM2(List<Integer> cluster) {
+        double p = 0, q = 0;
+        for (int i = 1; i < this.matrix.size(); i++) {
+            if (i >= cluster.get(0) && i <= cluster.get(1)) continue;
+            for (int j = i+1; j <= this.matrix.size(); j++) {
+                if (j >= cluster.get(0) && j <= cluster.get(1)) continue;
+                Set<String> intersection = new HashSet<>(this.matrix.get(i));
+                intersection.retainAll(this.matrix.get(j));
+                if (!intersection.isEmpty()) {
+                    q++;
+                } else {
+                    p++;
+                }
+            }
+        }
+        return Math.max(p - q, 0);
     }
 
     private List<Integer> getBestCluster() {
