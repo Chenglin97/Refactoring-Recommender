@@ -105,8 +105,7 @@ public class CodeSmellDetector {
             Method method = featureEnvyMethods.get(i);
             Resource sourceClass = sourceClasses.get(i);
 
-            // TODO extract the best code fragment
-
+            // extract the best code fragment
             Heuristic1 heuristic1 = new Heuristic1(method, sourcePaths);
             List<Integer> bestCluster = heuristic1.generateExtractOpportunity();
 
@@ -114,9 +113,10 @@ public class CodeSmellDetector {
             ArrayList<MethodDeclaration> methodsAfterAddingCluster = new ArrayList<>(classAfterAddingCluster.bodyDeclarations());
             MethodDeclaration methodToMove = methodsAfterAddingCluster.get(methodsAfterAddingCluster.size() - 1);
 
-
-            // extract the entire method
+            // determine best target class for cluster
             MethodMover methodMover = new MethodMover();
+            // UNCOMMENT line below to more entire methods instead of clusters
+            // Resource classToMoveMethodTo = methodMover.moveMethod(method.getNode(), sourceClass, classes);
             Resource classToMoveMethodTo = methodMover.moveMethod(methodToMove, sourceClass, classes);
             target_classes.add(classToMoveMethodTo);
         }
