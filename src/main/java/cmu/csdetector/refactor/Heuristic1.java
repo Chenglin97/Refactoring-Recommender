@@ -219,7 +219,7 @@ public class Heuristic1 {
     }
 
     private List<ASTNode> statementToMove(List<ASTNode> statementNodes, List<Integer> cluster) {
-        if (statementNodes == null || statementNodes.size() == 0) {
+        if (statementNodes == null || statementNodes.size() == 0 || cluster == null || cluster.size() == 0) {
             return new ArrayList<>();
         }
         int start = cluster.get(0)-1;
