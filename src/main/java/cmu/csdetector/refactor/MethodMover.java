@@ -1,5 +1,5 @@
 package cmu.csdetector.refactor;
-
+import java.io.*;
 import cmu.csdetector.ast.visitors.ExternalClassVariableCollector;
 import cmu.csdetector.metrics.MetricName;
 import cmu.csdetector.metrics.TypeMetricValueCollector;
@@ -23,6 +23,30 @@ import java.util.Map;
 
 public class MethodMover {
     private Map<Resource, Double> sum_lcom3_values = new HashMap<>();
+
+    public void saveRecommendationIntoFile(String recommendations){
+        try {
+            // Create a FileWriter object with the filename
+            FileWriter fw = new FileWriter("recommendation.txt", true);
+
+            // Create a BufferedWriter object to write the comments
+            BufferedWriter bw = new BufferedWriter(fw);
+
+            // Write the comment to the file
+            bw.write(recommendations);
+            bw.newLine();
+
+            // Close the BufferedWriter
+            bw.close();
+
+            // Print a message to confirm that the comment has been saved
+            System.out.println("Comment saved successfully!");
+        }
+        catch (IOException e) {
+            System.out.println("An error occurred while saving the comment.");
+            e.printStackTrace();
+        }
+    }
     public Resource moveMethod(ASTNode method_node, Resource source_class, ArrayList<Resource> classes) {
         // returns the class the method should be moved to
         // Resource source_class = method.getBelongingClass();
@@ -51,6 +75,9 @@ public class MethodMover {
         Resource target_class = getBestTargetClass(source_class);
 //        System.out.println("recommended target class: " + target_class.getFullyQualifiedName());
         System.out.println("Recommended operation: Move method " + method_node.toString() + " from " + source_class.getFullyQualifiedName() + " to " + target_class.getFullyQualifiedName());
+        String recommendations = "Recommended operation: Move method " + method_node.toString() + " from " + source_class.getFullyQualifiedName() + " to " + target_class.getFullyQualifiedName();
+        saveRecommendationIntoFile(recommendations);
+
         return target_class;
     }
 
