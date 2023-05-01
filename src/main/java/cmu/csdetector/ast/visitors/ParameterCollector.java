@@ -23,7 +23,7 @@ public class ParameterCollector extends ASTVisitor{
 		}
 		if (node.getParent() instanceof MethodInvocation) {
 			MethodInvocation methodInvocation = (MethodInvocation) node.getParent();
-			if (methodInvocation.getExpression().toString().equals(node.getIdentifier())) {
+			if (methodInvocation.getExpression() != null && methodInvocation.getExpression().toString().equals(node.getIdentifier())) {
 				this.parameters.add(node.getIdentifier());
 			}
 		} else {
