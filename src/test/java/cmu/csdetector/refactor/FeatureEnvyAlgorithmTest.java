@@ -74,10 +74,13 @@ public class FeatureEnvyAlgorithmTest {
         featureEnvies.add((MethodDeclaration) methodNode);
 
         ArrayList<Resource> target_classes = new ArrayList<>();
+
         target_classes.add((Resource) (testTypes.get("FieldAccessedByMethod")));
         target_classes.add((Resource) testTypes.get("RefusedBequestSample"));
 
-        System.out.println("featureEnvies: " + featureEnvies);
+        // System.out.println("featureEnvies: " + featureEnvies);
+
+        System.out.println("testMethods: " + testMethods);
         System.out.println("sourceClasses: " + sourceClasses);
         System.out.println("target_classes: " + target_classes);
 

@@ -50,7 +50,7 @@ public class MethodMover {
 
         Resource target_class = getBestTargetClass(source_class);
         System.out.println("recommended target class: " + target_class.getFullyQualifiedName());
-
+        System.out.println("Recommended operation: Move method " + method_node.toString() + " from " + source_class.getFullyQualifiedName() + " to " + target_class.getFullyQualifiedName());
         return target_class;
     }
 
@@ -64,9 +64,6 @@ public class MethodMover {
                 max_improvement = improvement;
                 target_class = candidate_class;
             }
-        }
-        if (max_improvement < 0) {
-            return source_class;
         }
         return target_class;
     }
@@ -147,5 +144,15 @@ public class MethodMover {
         TypeDeclaration sourceClassCopyDeclaration = (TypeDeclaration) sourceClassCopy.getNode();
         sourceClassCopyDeclaration.bodyDeclarations().remove(method);
         return sourceClassCopy;
+    }
+
+    public Resource moveMethodFromCluster(Method method, Resource sourceClass, List<String> sourcePaths, List<Integer> cluster, ArrayList<Resource> targetClasses) {
+        Heuristic1 heuristic1 = new Heuristic1(method, sourcePaths);
+        heuristic1.generateExtractOpportunity();
+        TypeDeclaration classAfterAddingCluster = heuristic1.createNewClassAfterAddingCluster(cluster);
+        ArrayList<MethodDeclaration> methodDeclarations = new ArrayList<>(classAfterAddingCluster.bodyDeclarations());
+
+        MethodDeclaration methodToMove = methodDeclarations.get(methodDeclarations.size() - 1);
+        return moveMethod((ASTNode) methodToMove, sourceClass, targetClasses);
     }
 }
