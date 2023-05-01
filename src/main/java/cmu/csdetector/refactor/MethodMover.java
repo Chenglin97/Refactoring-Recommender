@@ -40,7 +40,7 @@ public class MethodMover {
             bw.close();
 
             // Print a message to confirm that the comment has been saved
-            System.out.println("Comment saved successfully!");
+            //System.out.println("Comment saved successfully!");
         }
         catch (IOException e) {
             System.out.println("An error occurred while saving the comment.");
@@ -74,9 +74,9 @@ public class MethodMover {
 
         Resource target_class = getBestTargetClass(source_class);
 //        System.out.println("recommended target class: " + target_class.getFullyQualifiedName());
-        System.out.println("Recommended operation: Move method " + method_node.toString() + " from " + source_class.getFullyQualifiedName() + " to " + target_class.getFullyQualifiedName());
-        String recommendations = "Recommended operation: Move method " + method_node.toString() + " from " + source_class.getFullyQualifiedName() + " to " + target_class.getFullyQualifiedName();
+        String recommendations = "Recommended operation: Move method/cluster from " + source_class.getFullyQualifiedName() + " to " + target_class.getFullyQualifiedName() + "\nMETHOD TO MOVE:\n" + method_node.toString();
         saveRecommendationIntoFile(recommendations);
+        System.out.println(recommendations);
 
         return target_class;
     }

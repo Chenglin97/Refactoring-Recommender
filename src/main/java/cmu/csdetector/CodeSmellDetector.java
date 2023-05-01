@@ -122,7 +122,7 @@ public class CodeSmellDetector {
             // determine best target class for cluster
             MethodMover methodMover = new MethodMover();
             // UNCOMMENT line below to more entire methods instead of clusters
-            // Resource classToMoveMethodTo = methodMover.moveMethod(method.getNode(), sourceClass, classes);
+//             Resource classToMoveMethodTo = methodMover.moveMethod(method.getNode(), sourceClass, classes);
             Resource classToMoveMethodTo = methodMover.moveMethod(methodToMove, sourceClass, classes);
             target_classes.add(classToMoveMethodTo);
         }
