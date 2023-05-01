@@ -40,6 +40,9 @@ public class ExtractMethodOpportunity {
         return this.returnType;
     }
     public void setReturnType(String returnType) { this.returnType = returnType; }
-    public void addAlternative(ExtractMethodOpportunity opp) { this.alternatives.add(opp); }
+    public void addAlternative(ExtractMethodOpportunity opp) {
+        this.alternatives.add(opp);
+        this.alternatives.addAll(opp.getAlternatives());
+    }
     public List<ExtractMethodOpportunity> getAlternatives() { return this.alternatives; }
 }

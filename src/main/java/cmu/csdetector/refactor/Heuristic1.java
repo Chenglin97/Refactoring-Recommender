@@ -334,7 +334,7 @@ public class Heuristic1 {
         return returnList;
     }
 
-    private void groupClusters() {
+    private List<List<ExtractMethodOpportunity>> groupClusters() {
         // TODO: Group by benefit
         for (int i = 0; i < this.opportunities.size(); i++) {
             ExtractMethodOpportunity opp = this.opportunities.get(i);
@@ -348,10 +348,29 @@ public class Heuristic1 {
                     } else {
                         other_opp.addAlternative(opp);
                         opp.isAlternative = true;
+                        opp = this.opportunities.get(j);
                     }
                 }
             }
         }
+        List<List<ExtractMethodOpportunity>> groups = new ArrayList<>();
+        for (ExtractMethodOpportunity opp : this.opportunities) {
+            if (!opp.isAlternative) {
+                List<ExtractMethodOpportunity> group = new ArrayList<>();
+                group.add(opp);
+                group.addAll(opp.getAlternatives());
+                groups.add(group);
+            }
+        }
+        groups.sort(Comparator.comparingDouble(a -> a.get(0).getBenefit()));
+        Collections.reverse(groups);
+        for (List<ExtractMethodOpportunity> group : groups) {
+            System.out.print("\nGroup: ");
+            for (ExtractMethodOpportunity opp : group) {
+                System.out.print(opp.getCluster() + " Benefit: " + opp.getBenefit() + ", ");
+            }
+        }
+        return groups;
     }
 
     private void removeInvalidClusters() {
