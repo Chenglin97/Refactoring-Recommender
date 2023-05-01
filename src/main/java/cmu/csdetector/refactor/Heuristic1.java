@@ -2,6 +2,8 @@ package cmu.csdetector.refactor;
 
 import cmu.csdetector.ast.ASTBuilder;
 import cmu.csdetector.ast.visitors.CyclomaticComplexityVisitor;
+import cmu.csdetector.ast.visitors.MethodInvocationVisitor;
+import cmu.csdetector.ast.visitors.MethodInvocationVisitor2;
 import cmu.csdetector.ast.visitors.StatementCollector;
 import cmu.csdetector.metrics.calculators.type.LCOM2Calculator;
 import cmu.csdetector.resources.Method;
@@ -47,6 +49,12 @@ public class Heuristic1 {
 //        for (ASTNode ancestor : this.getAncestors(statementNodes.get(7))) {
 //            System.out.println(ASTNode.nodeClassForType(ancestor.getNodeType()));
 //        }
+
+//        MethodInvocationVisitor2 miVisitor = new MethodInvocationVisitor2();
+//        this.statementNodes.get(27).accept(miVisitor);
+//        List<MethodInvocation> methodInvocations = new ArrayList<>(miVisitor.getCalls());
+//        System.out.println("Calls: " + methodInvocations.get(0).getExpression());
+
         this.removeInvalidClusters();
         System.out.println("\nValid Clusters: " + this.clusters);
 
