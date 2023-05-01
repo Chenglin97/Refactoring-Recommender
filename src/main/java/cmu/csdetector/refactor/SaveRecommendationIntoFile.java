@@ -8,6 +8,8 @@ public class SaveRecommendationIntoFile {
 
     public void save(String recommendations){
         try {
+            System.out.println(recommendations);
+
             // Create a FileWriter object with the filename
             FileWriter fw = new FileWriter("recommendation.txt", true);
 

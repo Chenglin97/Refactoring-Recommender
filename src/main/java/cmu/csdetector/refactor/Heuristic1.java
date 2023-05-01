@@ -1,5 +1,6 @@
 package cmu.csdetector.refactor;
 
+import cmu.csdetector.refactor.SaveRecommendationIntoFile;
 import cmu.csdetector.ast.ASTBuilder;
 import cmu.csdetector.ast.visitors.ExpressionStatementVisitor;
 import cmu.csdetector.ast.visitors.ParameterCollector;
@@ -8,6 +9,7 @@ import cmu.csdetector.metrics.calculators.type.LCOM2Calculator;
 import cmu.csdetector.resources.Method;
 import org.eclipse.jdt.core.dom.*;
 import java.util.*;
+
 
 public class Heuristic1 {
 
@@ -22,6 +24,8 @@ public class Heuristic1 {
     private Set<List<Integer>> clusters = new HashSet<>();
     private List<ExtractMethodOpportunity> opportunities = new ArrayList<>();
     private TypeDeclaration classAfterAddingCluster;
+
+    private SaveRecommendationIntoFile writer = new SaveRecommendationIntoFile();
 
 
     public Heuristic1(Method method, List<String> sourcePaths) {
@@ -79,10 +83,24 @@ public class Heuristic1 {
         List<List<ExtractMethodOpportunity>> clusters = this.groupClusters();
         List<Integer> best_cluster = clusters.get(0).get(0).getCluster();
 
+        writer.save("Best cluster found on lines: " + best_cluster);
+        writer.save("Top Alternative Clusters:");
+        int i = 0;
+        for (List<ExtractMethodOpportunity> listOfOpportunities : clusters) {
+            writer.save("CLUSTERS BASED ON " + listOfOpportunities.get(0).getCluster() + ":");
+            for (ExtractMethodOpportunity opportunity : listOfOpportunities) {
+                i++;
+                writer.save("Cluster: " + opportunity.getCluster() + " Benefit: " + opportunity.getBenefit());
+                if (i > 5) {
+                    break;
+                }
+            }
+        }
+
 //        Uncomment line below to use non-paper custom logic
 //        best_cluster = getBestCluster();
 
-        return getBestCluster();
+        return best_cluster;
     }
 
     private List<String> getParameters(List<Integer> cluster) {

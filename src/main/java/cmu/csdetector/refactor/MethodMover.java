@@ -50,10 +50,8 @@ public class MethodMover {
 
         Resource target_class = getBestTargetClass(source_class);
 //        System.out.println("recommended target class: " + target_class.getFullyQualifiedName());
-        String recommendations = "Recommended operation: Move method/cluster from " + source_class.getFullyQualifiedName() + " to " + target_class.getFullyQualifiedName() + "\nMETHOD TO MOVE:\n" + method_node.toString();
         SaveRecommendationIntoFile writer = new SaveRecommendationIntoFile();
-        writer.save(recommendations);
-        System.out.print(recommendations);
+        writer.save("Recommended operation: Move method/cluster from " + source_class.getFullyQualifiedName() + " to " + target_class.getFullyQualifiedName() + "\nMETHOD TO MOVE:\n" + method_node.toString());
 
         return target_class;
     }

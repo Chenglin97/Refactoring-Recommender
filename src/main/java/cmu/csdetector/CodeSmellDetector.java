@@ -92,7 +92,9 @@ public class CodeSmellDetector {
 
     private void complexClassAlgorithm(List<Type> complexClasses, List<String> sourcePaths){
         for (Type type: complexClasses) {
+            writer.save("\nCOMPLEX CLASS: " + type.getFullyQualifiedName());
             for (Method method: type.getMethods()) {
+                writer.save("\nANALYZING METHOD: " + method.getFullyQualifiedName());
                 CyclomaticComplexityVisitor cyclomaticComplexityVisitor = new CyclomaticComplexityVisitor();
                 method.getNode().accept(cyclomaticComplexityVisitor);
                     // TODO run heuristics
@@ -101,6 +103,7 @@ public class CodeSmellDetector {
                 if (bestCluster != null && bestCluster.size() > 1) {
                     System.out.println("The best cluster is from line " + bestCluster.get(0) + " to " + bestCluster.get(1));
                 } else {
+                    writer.save("No clusters found");
                     System.out.println("No cluster found");
                 }
             }
@@ -116,9 +119,7 @@ public class CodeSmellDetector {
             Method method = featureEnvyMethods.get(i);
             Resource sourceClass = sourceClasses.get(i);
 
-            String recommendations = "\nFEATURE ENVY IN METHOD: " + method.getFullyQualifiedName();
-            System.out.println(recommendations);
-            writer.save(recommendations);
+            writer.save("\nFEATURE ENVY IN METHOD: " + method.getFullyQualifiedName());
 
             // extract the best code fragment
             Heuristic1 heuristic1 = new Heuristic1(method, sourcePaths);
@@ -130,9 +131,7 @@ public class CodeSmellDetector {
             MethodDeclaration methodToMove = methodsAfterAddingCluster.get(methodsAfterAddingCluster.size() - 1);
 
             if (bestCluster.size() == 0) {
-                recommendations = method.getFullyQualifiedName() + " has feature envy but no cluster to remove was found. Remove entire method.";
-                writer.save(recommendations);
-                System.out.println(recommendations);
+                System.out.println(method.getFullyQualifiedName() + " has feature envy but no cluster to remove was found. Remove entire method.");
                 methodToMove = methodNode;
             }
 
@@ -156,7 +155,11 @@ public class CodeSmellDetector {
                 complexClasses.add(type);
             }
         }
-        System.out.println("Analyze complex class, " + complexClasses.size() + " classes are complex classes.");
+        String output_text = "************PART 1: REFACTORING COMPLEX CLASS************";
+        writer.save(output_text);
+        output_text = complexClasses.size() + " classes are complex classes.";
+        writer.save(output_text);
+
         this.complexClassAlgorithm(complexClasses, sourcePaths);
 
         // get featureEnvy
@@ -177,7 +180,9 @@ public class CodeSmellDetector {
                 }
             }
         }
-        System.out.println("Analyze feature envy, " + featureEnvyNodes.size() + " methods have feature envy.");
+
+        writer.save("\n************PART 2: REFACTORING FEATURE ENVY************");
+        writer.save(featureEnvyNodes.size() + " methods have feature envy.");
         this.featureEnvyAlgorithm(featureEnvyNodes, featureEnvyMethods, featureEnvyClasses, canidateClasses, sourcePaths);
     }
 
