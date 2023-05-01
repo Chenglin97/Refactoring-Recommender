@@ -2,6 +2,7 @@ package cmu.csdetector.refactor;
 
 import cmu.csdetector.ast.ASTBuilder;
 import cmu.csdetector.ast.visitors.CyclomaticComplexityVisitor;
+import cmu.csdetector.ast.visitors.ParameterCollector;
 import cmu.csdetector.ast.visitors.StatementCollector;
 import cmu.csdetector.metrics.calculators.type.LCOM2Calculator;
 import cmu.csdetector.resources.Method;
@@ -51,7 +52,9 @@ public class Heuristic1 {
         System.out.println("\nValid Clusters: " + this.clusters);
 
         for (List<Integer> cluster : this.clusters) {
-            this.opportunities.add(new ExtractMethodOpportunity(cluster));
+            ExtractMethodOpportunity emo = new ExtractMethodOpportunity(cluster);
+            emo.setParameters(this.getParameters(cluster));
+            this.opportunities.add(emo);
         }
 
         // add input parameters with cluster
@@ -70,6 +73,17 @@ public class Heuristic1 {
         }
 
         return getBestCluster();
+    }
+
+    private List<String> getParameters(List<Integer> cluster) {
+        List<ASTNode> nodes = this.statementToMove(this.statementNodes, cluster);
+        Set<String> parameters = new HashSet<>();
+        for (ASTNode node : nodes) {
+            ParameterCollector parameterCollector = new ParameterCollector();
+            node.accept(parameterCollector);
+            parameters.addAll(parameterCollector.getParameters());
+        }
+        return new ArrayList<>(parameters);
     }
 
     private List<Integer> getBestCluster() {

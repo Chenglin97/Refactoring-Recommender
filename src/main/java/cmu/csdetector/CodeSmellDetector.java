@@ -89,10 +89,16 @@ public class CodeSmellDetector {
     private void complexClassAlgorithm(List<Type> complexClasses, List<String> sourcePaths){
         for (Type type: complexClasses) {
             for (Method method: type.getMethods()) {
+                CyclomaticComplexityVisitor cyclomaticComplexityVisitor = new CyclomaticComplexityVisitor();
+                method.getNode().accept(cyclomaticComplexityVisitor);
                     // TODO run heuristics
                 Heuristic1 heuristic1 = new Heuristic1(method, sourcePaths);
                 List<Integer> bestCluster = heuristic1.generateExtractOpportunity();
-
+                if (bestCluster != null && bestCluster.size() > 1) {
+                    System.out.println("The best cluster is from line " + bestCluster.get(0) + " to " + bestCluster.get(1));
+                } else {
+                    System.out.println("No cluster found");
+                }
             }
         }
 
