@@ -335,7 +335,6 @@ public class Heuristic1 {
     }
 
     private List<List<ExtractMethodOpportunity>> groupClusters() {
-        // TODO: Group by benefit
         for (int i = 0; i < this.opportunities.size(); i++) {
             ExtractMethodOpportunity opp = this.opportunities.get(i);
             if (opp.isAlternative) continue;
@@ -370,6 +369,7 @@ public class Heuristic1 {
                 System.out.print(opp.getCluster() + " Benefit: " + opp.getBenefit() + ", ");
             }
         }
+        // groups is a List<List<ExtractMethodOpportunity>> where groups.get(0) is the highest ranked group and the first opportunity in each group is the primary opportunity.
         return groups;
     }
 
