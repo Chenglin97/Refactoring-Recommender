@@ -62,7 +62,7 @@ public class Heuristic1 {
             ExtractMethodOpportunity emo = new ExtractMethodOpportunity(cluster);
             emo.setParameters(this.getParameters(cluster));
             emo.setReturnType(this.getReturnType(cluster));
-            System.out.println(emo.getReturnType());
+//            System.out.println(emo.getCluster() + " params: " + emo.getParameters() + " return type: " + emo.getReturnType());
             this.opportunities.add(emo);
         }
 
@@ -214,30 +214,6 @@ public class Heuristic1 {
         if (nodes.size() == 0) {
             return compilationUnit.toString();
         }
-
-//        MethodInvocation methodInvocation = ast.newMethodInvocation();
-//
-//        // Set the name of the method to call
-//        SimpleName methodToCall = ast.newSimpleName("iLoveRefactoringSoMuchFunMethod");
-//        methodInvocation.setName(methodToCall);
-//
-//        // Create the arguments for the method call
-//        List<Expression> arguments = methodInvocation.arguments();
-//        Expression argument1 = ast.newSimpleName("arg1");
-//        Expression argument2 = ast.newSimpleName("arg2");
-//        arguments.add(argument1);
-//        arguments.add(argument2);
-//
-//        // Set the expression to call the method on
-//        Expression expression = ast.newSimpleName("object");
-//        methodInvocation.setExpression(expression);
-//
-//        // Add the method call to a statement
-//        ExpressionStatement expressionStatement = ast.newExpressionStatement(methodInvocation);
-//
-//        Block parentBlock = (Block) nodes.get(0).getParent();
-//        int index = parentBlock.statements().indexOf(nodes.get(0));
-//        parentBlock.statements().add(index, expressionStatement);
 
         // New a method
         MethodDeclaration methodDeclaration = ast.newMethodDeclaration();
