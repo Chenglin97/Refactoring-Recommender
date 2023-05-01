@@ -39,6 +39,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -97,16 +98,26 @@ public class CodeSmellDetector {
 
     }
 
-    public List<Resource> featureEnvyAlgorithm(List<MethodDeclaration> featureEnvies, ArrayList<Resource> sourceClasses, ArrayList<Resource> classes) {
+    public List<Resource> featureEnvyAlgorithm(List<MethodDeclaration> featureEnvyNodes, List<Method> featureEnvyMethods, ArrayList<Resource> sourceClasses, ArrayList<Resource> classes, List<String> sourcePaths) {
         List<Resource> target_classes = new ArrayList<>();
-        for (int i = 0; i < featureEnvies.size(); i++) {
-            MethodDeclaration method = featureEnvies.get(i);
+        for (int i = 0; i < featureEnvyNodes.size(); i++) {
+            MethodDeclaration methodNode = featureEnvyNodes.get(i);
+            Method method = featureEnvyMethods.get(i);
             Resource sourceClass = sourceClasses.get(i);
+
             // TODO extract the best code fragment
+
+            Heuristic1 heuristic1 = new Heuristic1(method, sourcePaths);
+            List<Integer> bestCluster = heuristic1.generateExtractOpportunity();
+
+            TypeDeclaration classAfterAddingCluster = heuristic1.createNewClassAfterAddingCluster(bestCluster);
+            ArrayList<MethodDeclaration> methodsAfterAddingCluster = new ArrayList<>(classAfterAddingCluster.bodyDeclarations());
+            MethodDeclaration methodToMove = methodsAfterAddingCluster.get(methodsAfterAddingCluster.size() - 1);
+
 
             // extract the entire method
             MethodMover methodMover = new MethodMover();
-            Resource classToMoveMethodTo = methodMover.moveMethod(method, sourceClass, classes);
+            Resource classToMoveMethodTo = methodMover.moveMethod(methodToMove, sourceClass, classes);
             target_classes.add(classToMoveMethodTo);
         }
         return target_classes;
@@ -126,7 +137,8 @@ public class CodeSmellDetector {
         this.complexClassAlgorithm(complexClasses, sourcePaths);
 
         // get featureEnvy
-        List<MethodDeclaration> featureEnvies = new ArrayList<>();
+        List<MethodDeclaration> featureEnvyNodes = new ArrayList<>();
+        List<Method> featureEnvyMethods = new ArrayList<>();
         ArrayList<Resource> canidateClasses = new ArrayList<>();
         ArrayList<Resource> featureEnvyClasses = new ArrayList<>();
         FeatureEnvy detector = new FeatureEnvy();
@@ -136,13 +148,14 @@ public class CodeSmellDetector {
             for (Method method : type.getMethods()) {
                 List<Smell> smells = detector.detect(method);
                 if (smells.size() > 0) {
-                    featureEnvies.add((MethodDeclaration) method.getNode());
+                    featureEnvyNodes.add((MethodDeclaration) method.getNode());
+                    featureEnvyMethods.add(method);
                     featureEnvyClasses.add(type);
                 }
             }
         }
-        System.out.println("Analyze feature envy, " + featureEnvies.size() + " methods have feature envy.");
-        this.featureEnvyAlgorithm(featureEnvies, featureEnvyClasses, canidateClasses);
+        System.out.println("Analyze feature envy, " + featureEnvyNodes.size() + " methods have feature envy.");
+        this.featureEnvyAlgorithm(featureEnvyNodes, featureEnvyMethods, featureEnvyClasses, canidateClasses, sourcePaths);
     }
 
 

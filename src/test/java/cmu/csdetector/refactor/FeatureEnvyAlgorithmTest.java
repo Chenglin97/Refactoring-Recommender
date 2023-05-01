@@ -56,7 +56,11 @@ public class FeatureEnvyAlgorithmTest {
 
     @Test
     public void testFeatureEnvyAlgorithm() {
+        ArrayList<String> sourcePaths = new ArrayList<>();
+        sourcePaths.add("../RefactoringTest");
+
         ArrayList<MethodDeclaration> featureEnvies = new ArrayList<>();
+        ArrayList<Method> featureEnvyMethods = new ArrayList<>();
 
         ArrayList<Resource> sourceClasses = new ArrayList<>();
         String testClassName = "FeatureEnvyMethod";
@@ -65,6 +69,8 @@ public class FeatureEnvyAlgorithmTest {
         String testMethodName = "superForeign";
         ASTNode methodNode = testMethods.get(testClassName).get(testMethodName).getNode();
         featureEnvies.add((MethodDeclaration) methodNode);
+        featureEnvyMethods.add(testMethods.get(testClassName).get(testMethodName));
+
 
         testClassName = "BlobClassSample";
         sourceClass = testTypes.get(testClassName);
@@ -72,6 +78,7 @@ public class FeatureEnvyAlgorithmTest {
         testMethodName = "a";
         methodNode = testMethods.get(testClassName).get(testMethodName).getNode();
         featureEnvies.add((MethodDeclaration) methodNode);
+        featureEnvyMethods.add(testMethods.get(testClassName).get(testMethodName));
 
         ArrayList<Resource> target_classes = new ArrayList<>();
 
@@ -84,7 +91,7 @@ public class FeatureEnvyAlgorithmTest {
         System.out.println("sourceClasses: " + sourceClasses);
         System.out.println("target_classes: " + target_classes);
 
-        List<Resource> result_classes = detector.featureEnvyAlgorithm(featureEnvies, sourceClasses, target_classes);
+        List<Resource> result_classes = detector.featureEnvyAlgorithm(featureEnvies, featureEnvyMethods, sourceClasses, target_classes, sourcePaths);
         Assertions.assertEquals(2, result_classes.size());
         Assertions.assertEquals("cmu.csdetector.dummy.smells.RefusedBequestSample", result_classes.get(0).getFullyQualifiedName());
         Assertions.assertEquals("cmu.csdetector.dummy.smells.BlobClassSample", result_classes.get(1).getFullyQualifiedName());
