@@ -11,6 +11,7 @@ import cmu.csdetector.metrics.TypeMetricValueCollector;
 import cmu.csdetector.metrics.calculators.type.LCOM2Calculator;
 import cmu.csdetector.refactor.Heuristic1;
 import cmu.csdetector.refactor.MethodMover;
+import cmu.csdetector.refactor.SaveRecommendationIntoFile;
 import cmu.csdetector.resources.ParenthoodRegistry;
 import cmu.csdetector.resources.Resource;
 import cmu.csdetector.resources.loader.SourceFileASTRequestor;
@@ -49,6 +50,8 @@ public class CodeSmellDetector {
 
     private SourceFilesLoader compUnitLoader;
 
+    private SaveRecommendationIntoFile writer = new SaveRecommendationIntoFile();
+
     public static void main(String[] args) throws IOException{
         CodeSmellDetector instance = new CodeSmellDetector();
 
@@ -58,6 +61,7 @@ public class CodeSmellDetector {
 
     private void start(String[] args) throws IOException {
         ToolParameters parameters = ToolParameters.getInstance();
+        writer.clear();
 
         try {
             parameters.parse(args);
@@ -106,12 +110,15 @@ public class CodeSmellDetector {
 
     public List<Resource> featureEnvyAlgorithm(List<MethodDeclaration> featureEnvyNodes, List<Method> featureEnvyMethods, ArrayList<Resource> sourceClasses, ArrayList<Resource> classes, List<String> sourcePaths) {
         List<Resource> target_classes = new ArrayList<>();
+
         for (int i = 0; i < featureEnvyNodes.size(); i++) {
             MethodDeclaration methodNode = featureEnvyNodes.get(i);
             Method method = featureEnvyMethods.get(i);
             Resource sourceClass = sourceClasses.get(i);
 
-            System.out.println("FEATURE ENVY IN METHOD: " + method.getFullyQualifiedName());
+            String recommendations = "\nFEATURE ENVY IN METHOD: " + method.getFullyQualifiedName();
+            System.out.println(recommendations);
+            writer.save(recommendations);
 
             // extract the best code fragment
             Heuristic1 heuristic1 = new Heuristic1(method, sourcePaths);
@@ -123,7 +130,9 @@ public class CodeSmellDetector {
             MethodDeclaration methodToMove = methodsAfterAddingCluster.get(methodsAfterAddingCluster.size() - 1);
 
             if (bestCluster.size() == 0) {
-                System.out.println(method.getFullyQualifiedName() + " has feature envy but no cluster to remove was found. Remove entire method.");
+                recommendations = method.getFullyQualifiedName() + " has feature envy but no cluster to remove was found. Remove entire method.";
+                writer.save(recommendations);
+                System.out.println(recommendations);
                 methodToMove = methodNode;
             }
 

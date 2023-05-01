@@ -23,30 +23,6 @@ import java.util.Map;
 
 public class MethodMover {
     private Map<Resource, Double> sum_lcom3_values = new HashMap<>();
-
-    public void saveRecommendationIntoFile(String recommendations){
-        try {
-            // Create a FileWriter object with the filename
-            FileWriter fw = new FileWriter("recommendation.txt", true);
-
-            // Create a BufferedWriter object to write the comments
-            BufferedWriter bw = new BufferedWriter(fw);
-
-            // Write the comment to the file
-            bw.write(recommendations);
-            bw.newLine();
-
-            // Close the BufferedWriter
-            bw.close();
-
-            // Print a message to confirm that the comment has been saved
-            //System.out.println("Comment saved successfully!");
-        }
-        catch (IOException e) {
-            System.out.println("An error occurred while saving the comment.");
-            e.printStackTrace();
-        }
-    }
     public Resource moveMethod(ASTNode method_node, Resource source_class, ArrayList<Resource> classes) {
         // returns the class the method should be moved to
         // Resource source_class = method.getBelongingClass();
@@ -75,8 +51,9 @@ public class MethodMover {
         Resource target_class = getBestTargetClass(source_class);
 //        System.out.println("recommended target class: " + target_class.getFullyQualifiedName());
         String recommendations = "Recommended operation: Move method/cluster from " + source_class.getFullyQualifiedName() + " to " + target_class.getFullyQualifiedName() + "\nMETHOD TO MOVE:\n" + method_node.toString();
-        saveRecommendationIntoFile(recommendations);
-        System.out.println(recommendations);
+        SaveRecommendationIntoFile writer = new SaveRecommendationIntoFile();
+        writer.save(recommendations);
+        System.out.print(recommendations);
 
         return target_class;
     }
