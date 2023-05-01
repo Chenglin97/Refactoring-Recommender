@@ -111,13 +111,21 @@ public class CodeSmellDetector {
             Method method = featureEnvyMethods.get(i);
             Resource sourceClass = sourceClasses.get(i);
 
+            System.out.println("FEATURE ENVY IN METHOD: " + method.getFullyQualifiedName());
+
             // extract the best code fragment
             Heuristic1 heuristic1 = new Heuristic1(method, sourcePaths);
             List<Integer> bestCluster = heuristic1.generateExtractOpportunity();
 
+
             TypeDeclaration classAfterAddingCluster = heuristic1.createNewClassAfterAddingCluster(bestCluster);
             ArrayList<MethodDeclaration> methodsAfterAddingCluster = new ArrayList<>(classAfterAddingCluster.bodyDeclarations());
             MethodDeclaration methodToMove = methodsAfterAddingCluster.get(methodsAfterAddingCluster.size() - 1);
+
+            if (bestCluster.size() == 0) {
+                System.out.println(method.getFullyQualifiedName() + " has feature envy but no cluster to remove was found. Remove entire method.");
+                methodToMove = methodNode;
+            }
 
             // determine best target class for cluster
             MethodMover methodMover = new MethodMover();
