@@ -8,14 +8,21 @@ import java.util.*;
 public class ParameterCollector extends ASTVisitor{
 
 	Set<String> parameters;
+	Set<String> filters;
+
 
 	public ParameterCollector() {
 		this.parameters = new HashSet<>();
+		this.filters = new HashSet<>();
 	}
 
 	@Override
 	public boolean visit(SimpleName node) {
+		if (this.filters.contains(node.getIdentifier())) {
+			return false;
+		}
 		if (node.getParent() instanceof VariableDeclarationFragment && node.getParent().getParent() instanceof VariableDeclarationStatement) {
+			this.filters.add(node.getIdentifier());
 			return false;
 		}
 		if (Character.isUpperCase(node.getIdentifier().charAt(0))) {

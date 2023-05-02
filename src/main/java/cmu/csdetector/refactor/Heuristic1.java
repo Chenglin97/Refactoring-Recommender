@@ -99,8 +99,8 @@ public class Heuristic1 {
     private List<String> getParameters(List<Integer> cluster) {
         List<ASTNode> nodes = this.statementToMove(this.statementNodes, cluster);
         Set<String> parameters = new HashSet<>();
+        ParameterCollector parameterCollector = new ParameterCollector();
         for (ASTNode node : nodes) {
-            ParameterCollector parameterCollector = new ParameterCollector();
             node.accept(parameterCollector);
             parameters.addAll(parameterCollector.getParameters());
         }
