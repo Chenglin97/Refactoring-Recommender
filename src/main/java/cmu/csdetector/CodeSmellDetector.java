@@ -124,9 +124,11 @@ public class CodeSmellDetector {
                     }
                 }
 
+
+
                 writer.save("Recommendations:");
                 for (List<String> rec : recommendations) {
-                    writer.save("Extract the following method from " + method.getFullyQualifiedName() + " with parameters: " + rec.get(2));
+                    writer.save("Extract the following method from " + method.getFullyQualifiedName() + " with parameters: " + rec.subList(2, rec.size()));
                     writer.save(rec.get(1));
                     writer.save("... so that " + method.getFullyQualifiedName() + " becomes: ");
                     writer.save(rec.get(0));
